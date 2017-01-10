@@ -7,18 +7,17 @@ using namespace std;
 
 int takeRoad(void)
 {
-    VideoCapture vc(0); // Connect cam
+    // TODO : Connect camera when executing on odroid
+    VideoCapture vc("sample.avi"); // Load test video
     if (!vc.isOpened()) return false;
 
-    Mat img, dst; //img선언
-    cout<<"Press ESC to exit"<<endl;
+    Mat img; // frame
+
     while (1) {
         vc >> img; // Put the captured image in img
         if (img.empty()) break;
 
-        flip(img, dst, 1);	// Reverse left / right
-
-        imshow("detect", dst);  // show image
+        imshow("detect", img);  // show image
 
         if (waitKey(10) == 27) break; // ESC(27) -> break
     }
