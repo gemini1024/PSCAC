@@ -1,3 +1,6 @@
+// cam.cpp
+// Control various functions using camera.
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
@@ -16,6 +19,9 @@ int takeRoad(void)
     while (1) {
         vc >> img; // Put the captured image in img
         if (img.empty()) break;
+
+        // TODO : Detect pedestrians and vehicle
+
 
         imshow("detect", img);  // show image
 

@@ -1,3 +1,6 @@
+# Makefile
+# using opencv
+
 CC = g++
 OBJS = main.o cam.o
 TARGET = detect
