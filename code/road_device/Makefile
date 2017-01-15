@@ -2,7 +2,7 @@
 # using opencv
 
 CC = g++
-OBJS = main.o cam.o
+OBJS = main.o cam.o detectors.o
 TARGET = detect
 
 .SUFFIXES : .cpp .o
