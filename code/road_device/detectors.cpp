@@ -4,7 +4,10 @@
 #include "detectors.h"
 
 PedestriansDetector::PedestriansDetector() {
-    hog_detector.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
+    if( !detector.load( "data/hogcascade_pedestrians.xml" ) ) {
+        cerr << "ERROR: Could not load classifier human detect cascade" << endl;
+        exit(1);
+    }
 }
 
 PedestriansDetector::~PedestriansDetector() {
@@ -12,7 +15,7 @@ PedestriansDetector::~PedestriansDetector() {
 
 void PedestriansDetector::findPedestrians(Mat& img) {
     // Find Pedestrians
-    hog_detector.detectMultiScale(img, found, 0, Size(8,8), Size(32,32), 1.05, 2);
+    detector.detectMultiScale(img, found, 1.1, 6, 0, cvSize(48,96), cvSize(100,200));
 
     // Draw Rectangle on Pedestrians
     for ( size_t i = 0 ; i < found.size() ; i++ ) {
