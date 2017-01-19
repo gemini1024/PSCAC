@@ -4,7 +4,7 @@
 #include "detectors.h"
 
 PedestriansDetector::PedestriansDetector() {
-    if( !detector.load( "data/hogcascade_pedestrians.xml" ) ) {
+    if( !detector.load( "data/haarcascade_fullbody.xml" ) ) {
         cerr << "ERROR: Could not load classifier human detect cascade" << endl;
         exit(1);
     }
@@ -15,7 +15,7 @@ PedestriansDetector::~PedestriansDetector() {
 
 void PedestriansDetector::findPedestrians(Mat& img) {
     // Find Pedestrians
-    detector.detectMultiScale(img, found, 1.1, 6, 0, cvSize(48,96), cvSize(100,200));
+    detector.detectMultiScale(img, found, 1.1, 2, 0|1, Size(40,70), Size(80,300));
 
     // Draw Rectangle on Pedestrians
     for ( size_t i = 0 ; i < found.size() ; i++ ) {
