@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     pid_t pid;
     switch( pid = fork() ) {
         case -1 :
-            cerr << "fork() failed" << endl;
+            cerr << "ERROR : fork() failed" << endl;
             break;
         case 0 : // Detect pedestrians and vehicle on road
             takeRoad();

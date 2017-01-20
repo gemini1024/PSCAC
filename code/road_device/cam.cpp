@@ -1,8 +1,8 @@
 // cam.cpp
 // Control various functions using camera.
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 #include <iostream>
 
 #include "detectors.h"
@@ -22,11 +22,12 @@ int takeRoad(void)
 
 
     Mat img; // frame
-    // TODO : Add Vehicle Dectector
-    PedestriansDetector ped_Detector;
+    PedestriansDetector pe_Detector;
+    VehiclesDetector car_Detector;
 
 
     while (1) {
+
         vc >> img; // Put the captured image in img
         if (img.empty())  {
             cerr << "ERROR : load frame" << endl;
@@ -35,15 +36,21 @@ int takeRoad(void)
 
 
 
-        // TODO : Detect pedestrians and vehicle
-        ped_Detector.findPedestrians(img);
+        // Detect pedestrians and vehicle
+        // TODO : Must be detected quickly
+        pe_Detector.detect(img);
+        car_Detector.detect(img);
+
+        // TODO : Send signals corresponding to each situation
 
 
 
         imshow("detect", img);  // show image
 
         if (waitKey(10) == 27) break; // ESC(27) -> break
+
     }
+
     destroyAllWindows();
 
     return true;

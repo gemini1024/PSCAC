@@ -6,19 +6,52 @@
 #define DETECTOR_H
 
 #include <opencv2/opencv.hpp>
+#include <string>
 
 using namespace cv;
 using namespace std;
 
-class PedestriansDetector {
-    private:
-        CascadeClassifier detector;
-        vector<Rect> found;
 
-    public:
-        PedestriansDetector();
-        ~PedestriansDetector();
-        void findPedestrians(Mat& img);
+
+
+class Detector {
+protected:
+    CascadeClassifier detector;
+    vector<Rect> found;
+
+public:
+    Detector(const string data_xml);
+    ~Detector();
+    virtual void detect(Mat& img) = 0;
+};
+
+
+
+
+class PedestriansDetector : public Detector {
+private:
+
+public:
+    PedestriansDetector();
+    ~PedestriansDetector();
+    virtual void detect(Mat& img);
+    // TODO : Process when pedestrians exist
+
+};
+
+
+
+
+
+class VehiclesDetector : public Detector {
+private:
+
+public:
+    VehiclesDetector();
+    ~VehiclesDetector();
+    virtual void detect(Mat& img);
+    // TODO : Process when vehicles exist
+
 };
 
 #endif
