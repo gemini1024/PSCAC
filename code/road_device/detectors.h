@@ -22,7 +22,7 @@ protected:
 public:
     Detector(const string data_xml);
     ~Detector();
-    virtual void detect(Mat& img) = 0;
+    virtual void detect(UMat& img) = 0;
 };
 
 
@@ -34,7 +34,7 @@ private:
 public:
     PedestriansDetector();
     ~PedestriansDetector();
-    virtual void detect(Mat& img);
+    virtual void detect(UMat& img);
     // TODO : Process when pedestrians exist
 
 };
@@ -49,7 +49,7 @@ private:
 public:
     VehiclesDetector();
     ~VehiclesDetector();
-    virtual void detect(Mat& img);
+    virtual void detect(UMat& img);
     // TODO : Process when vehicles exist
 
 };

@@ -21,7 +21,7 @@ int takeRoad(void)
 
 
 
-    Mat img; // frame
+    UMat img; // using OpenCL
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 

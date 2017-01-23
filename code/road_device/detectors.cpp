@@ -26,7 +26,7 @@ PedestriansDetector::PedestriansDetector()
 PedestriansDetector::~PedestriansDetector() {
 }
 
-void PedestriansDetector::detect(Mat& img) {
+void PedestriansDetector::detect(UMat& img) {
     // Find Pedestrians
     detector.detectMultiScale(img, found, 1.1, 2, 0, Size(40,70), Size(80,300));
 
@@ -49,7 +49,7 @@ VehiclesDetector::VehiclesDetector()
 VehiclesDetector::~VehiclesDetector() {
 }
 
-void VehiclesDetector::detect(Mat& img) {
+void VehiclesDetector::detect(UMat& img) {
     // Find Vehicles
     // TODO : Reduce false alarm rate
     detector.detectMultiScale(img, found, 1.1, 2, 0, Size(30,30), Size(480,480));
