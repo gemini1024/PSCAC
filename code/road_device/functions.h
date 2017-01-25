@@ -8,7 +8,7 @@
 int takeRoad(void);
 
 // Communication functions.
-
+void regSignals(void); // ( In sigdef.cpp )
 
 
 

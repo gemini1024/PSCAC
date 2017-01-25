@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     cout<<"Press ESC to exit"<<endl;
     cout << "( Using OpenCV " << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << "." << CV_SUBMINOR_VERSION << " )" << endl;
 
+    regSignals();
 
     pid_t pid;
     switch( pid = fork() ) {
@@ -25,8 +26,8 @@ int main(int argc, char** argv)
             takeRoad();
             break;
         default : // Alert
-            // TODO : Send Warning Message
-            waitpid(pid, NULL, 0);
+            // TODO : Send Warning Message until the camera is shut down
+            while(waitpid(pid, NULL, 0) != pid);
             break;
     }
 

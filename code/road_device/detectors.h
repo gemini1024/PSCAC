@@ -9,20 +9,19 @@
 #include <string>
 
 using namespace cv;
-using namespace std;
-
 
 
 
 class Detector {
 protected:
     CascadeClassifier detector;
-    vector<Rect> found;
+    std::vector<Rect> found;
 
 public:
-    Detector(const string data_xml);
-    ~Detector();
+    Detector(const std::string data_xml);
+    virtual ~Detector();
     virtual void detect(UMat& img) = 0;
+    bool isFound(void);
 };
 
 
@@ -33,10 +32,8 @@ private:
 
 public:
     PedestriansDetector();
-    ~PedestriansDetector();
+    virtual ~PedestriansDetector();
     virtual void detect(UMat& img);
-    // TODO : Process when pedestrians exist
-
 };
 
 
@@ -48,10 +45,8 @@ private:
 
 public:
     VehiclesDetector();
-    ~VehiclesDetector();
+    virtual ~VehiclesDetector();
     virtual void detect(UMat& img);
-    // TODO : Process when vehicles exist
-
 };
 
 #endif
