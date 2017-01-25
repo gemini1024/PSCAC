@@ -13,12 +13,10 @@ using namespace cv; // openCV
 
 int takeRoad(void)
 {
-    // TODO : Connect camera when executing on odroid
-    // VideoCapture vc(0);
-    // vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-    // vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-
-    VideoCapture vc("sample.avi"); // Load test video
+    // Connect camera
+    VideoCapture vc(0);
+    vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+    vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
     if (!vc.isOpened()) {
         std::cerr << "ERROR : Cannot open the camera" << std::endl;
         return false;
