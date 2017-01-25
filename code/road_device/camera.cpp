@@ -1,4 +1,4 @@
-// cam.cpp
+// camera.cpp
 // Control various functions using camera.
 // Executed by child process
 
@@ -6,8 +6,8 @@
 #include <opencv2/highgui.hpp>
 #include <iostream>
 
-#include "detectors.h"
-#include "sigdef.h"
+#include "Detectors.h"
+#include "SigDef.h"
 
 using namespace cv; // openCV
 
@@ -40,13 +40,13 @@ int takeRoad(void)
         // Detect pedestrians and vehicle
         pe_Detector.detect(img);
         if( pe_Detector.isFound() ) {
-            sendSignalToParentProcess(sigdef::SIG_FOUND_HUMAN);
+            sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
         }
 
         // TODO : Must be detected quickly
         car_Detector.detect(img);
         if( car_Detector.isFound() ) {
-            sendSignalToParentProcess(sigdef::SIG_FOUND_CAR);
+            sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
         }
 
 

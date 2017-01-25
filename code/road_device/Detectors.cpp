@@ -1,7 +1,7 @@
-// detectors.cpp
+// Detectors.cpp
 // Detectors' functions
 
-#include "detectors.h"
+#include "Detectors.h"
 
 
 // Functions of Detector

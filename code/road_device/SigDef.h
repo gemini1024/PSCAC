@@ -1,4 +1,4 @@
-// sigdef.h
+// SigDef.h
 // Defines the signals and functions to use.
 
 #ifndef SIGDEF_H
@@ -10,7 +10,7 @@
 void sendSignalToParentProcess(int signo);
 void regSignals(void);
 
-namespace sigdef {
+namespace SigDef {
     enum {
         SIG_FOUND_HUMAN = SIGUSR1,
         SIG_FOUND_CAR = SIGUSR2

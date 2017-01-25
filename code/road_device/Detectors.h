@@ -1,4 +1,4 @@
-// detectors.h
+// Detectors.h
 // Detectors using opencv
 
 

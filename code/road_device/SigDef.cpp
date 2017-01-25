@@ -1,7 +1,7 @@
-// sigdef.cpp
+// SigDef.cpp
 // Send the situation shot by camera to each device.
 
-#include "sigdef.h"
+#include "SigDef.h"
 #include <iostream>
 #include <unistd.h>
 
@@ -17,10 +17,10 @@ void regSignals(void) {
 
     // Do not process other signals before current processing is finished
     sigfillset(&act.sa_mask);
-    act.sa_handler = sigdef::signalHandler;
+    act.sa_handler = SigDef::signalHandler;
 
-    if( sigaction(sigdef::SIG_FOUND_HUMAN, &act, NULL) < 0
-        || sigaction(sigdef::SIG_FOUND_CAR, &act, NULL) < 0) {
+    if( sigaction(SigDef::SIG_FOUND_HUMAN, &act, NULL) < 0
+        || sigaction(SigDef::SIG_FOUND_CAR, &act, NULL) < 0) {
         perror("sigaction");
         exit(1);
     }
@@ -30,7 +30,7 @@ void regSignals(void) {
 
 
 // Internal calling functions
-void sigdef::signalHandler(int signo) {
+void SigDef::signalHandler(int signo) {
     switch(signo) {
         case SIG_FOUND_HUMAN :
             foundPedestrians();
@@ -44,12 +44,12 @@ void sigdef::signalHandler(int signo) {
 }
 
 
-void sigdef::foundPedestrians(void) {
+void SigDef::foundPedestrians(void) {
     // TODO : send data to Server
     std::cout<< "Found  Pedestrians" << std::endl;
 }
 
-void sigdef::foundVehicles(void) {
+void SigDef::foundVehicles(void) {
     // TODO : send data to Pedestrians
     std::cout<< "Found  Vehicles" << std::endl;
 }
