@@ -38,14 +38,13 @@ int takeRoad(void)
         }
 
         // Detect pedestrians and vehicle
-        // TODO : Must be detected quickly
         pe_Detector.detect(img);
-        car_Detector.detect(img);
-
-
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(sigdef::SIG_FOUND_HUMAN);
         }
+
+        // TODO : Must be detected quickly
+        car_Detector.detect(img);
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(sigdef::SIG_FOUND_CAR);
         }
@@ -54,7 +53,7 @@ int takeRoad(void)
         imshow("detect", img);  // show image
 
         if (waitKey(10) == 27) {  // ESC(27) -> break
-            std::cout << "Closing the programe ..." << std::endl;
+            std::cout << "Closing the program ..." << std::endl;
             break;
         }
     }
