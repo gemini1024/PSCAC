@@ -15,18 +15,19 @@ int main(int argc, char** argv)
     cout<<"Press ESC to exit"<<endl;
     cout << "( Using OpenCV " << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << "." << CV_SUBMINOR_VERSION << " )" << endl;
 
+    regSignals();
 
     pid_t pid;
     switch( pid = fork() ) {
         case -1 :
-            cerr << "fork() failed" << endl;
+            cerr << "ERROR : fork() failed" << endl;
             break;
         case 0 : // Detect pedestrians and vehicle on road
             takeRoad();
             break;
         default : // Alert
-            // TODO : Send Warning Message
-            waitpid(pid, NULL, 0);
+            // TODO : Send Warning Message until the camera is shut down
+            while(waitpid(pid, NULL, 0) != pid);
             break;
     }
 
