@@ -4,6 +4,7 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/bgsegm.hpp>
 #include <iostream>
 
 #include "Detectors.h"
@@ -25,7 +26,12 @@ int takeRoad(void)
     }
 
 
-    UMat img; // using OpenCL
+    UMat img, fgimg; // using OpenCL
+    UMat fgMask; // Mask excluding moving objects
+
+    // Ptr<BackgroundSubtractor> pMask = bgsegm::createBackgroundSubtractorMOG();
+    Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorMOG2();
+
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 
@@ -36,27 +42,32 @@ int takeRoad(void)
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             break;
         }
+        pMask->apply(img, fgMask);
+        fgimg.release();
+        img.copyTo(fgimg, fgMask);
 
         // Detect pedestrians and vehicle
-        pe_Detector.detect(img);
+        pe_Detector.detect(fgimg);
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
         }
 
         // TODO : Must be detected quickly
-        car_Detector.detect(img);
+        car_Detector.detect(fgimg);
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
         }
 
 
-        imshow("detect", img);  // show image
+        imshow("detect", fgimg);  // show image
 
         if (waitKey(10) == 27) {  // ESC(27) -> break
             std::cout << "Closing the program ..." << std::endl;
             break;
         }
     }
+
+    vc.release();
 
     destroyAllWindows();
 
