@@ -27,13 +27,14 @@ int takeRoad(void)
 
 
     UMat img, fgimg; // using OpenCL
-    UMat fgMask; // Mask excluding moving objects
+    UMat fgMask, accuMask; // Mask excluding moving objects
 
     // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorMOG2();
     // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorKNN();
     // Ptr<BackgroundSubtractor> pMask = bgsegm::createBackgroundSubtractorMOG();
     Ptr<bgsegm::BackgroundSubtractorGMG> pMask = bgsegm::createBackgroundSubtractorGMG();
 
+    pMask->setNumFrames(200);
     // TODO : Remove output after adjusting properties
     std::cout << "LearningRate : " << pMask->getDefaultLearningRate()
     << "\nQuantizationLevels : " << pMask->getQuantizationLevels ()
@@ -45,8 +46,51 @@ int takeRoad(void)
     VehiclesDetector car_Detector;
 
 
-    int numFrame = 0, numinitializationFrame = pMask->getNumFrames();
+    // After numinitializationFrame, the frame is display on the screen
     std::cout << "Recognize the background ... " << std::endl;
+    for(int n = 0; n <= pMask->getNumFrames()+1; n++) {
+        vc >> img;
+        if (img.empty())  {
+            std::cerr << "ERROR : Unable to load frame" << std::endl;
+            break;
+        }
+        pMask->apply(img, fgMask);
+        imshow("origin", img);  // show image
+
+        if (waitKey(10) == 27) {  // ESC(27) -> break
+            std::cout << "Closing the program ..." << std::endl;
+            break;
+        }
+    }
+
+
+    fgMask.copyTo(accuMask);
+
+
+    for(int n = 0; n <= 50; n++) {
+        vc >> img;
+        if (img.empty())  {
+            std::cerr << "ERROR : Unable to load frame" << std::endl;
+            break;
+        }
+
+        pMask->apply(img, fgMask);
+        bitwise_or(fgMask, accuMask, accuMask);
+
+        imshow("origin", img);  // show image
+        imshow("mask", accuMask);  // show image
+
+        if (waitKey(10) == 27) {  // ESC(27) -> break
+            std::cout << "Closing the program ..." << std::endl;
+            break;
+        }
+    }
+
+
+
+
+    std::cout << "Complete!" << std::endl;
+
 
     while (1) {
         vc >> img; // Put the captured image in img
@@ -55,13 +99,8 @@ int takeRoad(void)
             break;
         }
 
-        // After numinitializationFrame, the frame is display on the screen
-        if( (++numFrame) == numinitializationFrame ) {
-            std::cout << "Complete!" << std::endl;
-        }
-        pMask->apply(img, fgMask);
         fgimg.release();
-        img.copyTo(fgimg, fgMask);
+        img.copyTo(fgimg, accuMask);
 
         // Detect pedestrians and vehicle
         pe_Detector.detect(fgimg);
@@ -76,6 +115,8 @@ int takeRoad(void)
         }
 
 
+        imshow("origin", img);  // show image
+        imshow("mask", accuMask);  // show image
         imshow("detect", fgimg);  // show image
 
         if (waitKey(10) == 27) {  // ESC(27) -> break
