@@ -7,6 +7,7 @@
 #include <opencv2/bgsegm.hpp>
 #include <iostream>
 
+#include "BackgroundMask.h"
 #include "Detectors.h"
 #include "SigDef.h"
 
@@ -26,70 +27,14 @@ int takeRoad(void)
     }
 
 
-    UMat img, fgimg; // using OpenCL
-    UMat fgMask, accuMask; // Mask excluding moving objects
+    UMat img, fgimg, mask; // using OpenCL
 
-    // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorMOG2();
-    // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorKNN();
-    // Ptr<BackgroundSubtractor> pMask = bgsegm::createBackgroundSubtractorMOG();
-    Ptr<bgsegm::BackgroundSubtractorGMG> pMask = bgsegm::createBackgroundSubtractorGMG();
-
-    pMask->setNumFrames(200);
-    // TODO : Remove output after adjusting properties
-    std::cout << "LearningRate : " << pMask->getDefaultLearningRate()
-    << "\nQuantizationLevels : " << pMask->getQuantizationLevels ()
-    << "\nSmoothingRadius : " << pMask->getSmoothingRadius()
-    << "\nUpdateBackgroundModel : " << pMask->getUpdateBackgroundModel()
-    << std::endl;
+    BackgroundMask bgMask;
+    bgMask.printProperties();
+    mask = bgMask.createBackgroundMask(vc);
 
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
-
-
-    // After numinitializationFrame, the frame is display on the screen
-    std::cout << "Recognize the background ... " << std::endl;
-    for(int n = 0; n <= pMask->getNumFrames()+1; n++) {
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            break;
-        }
-        pMask->apply(img, fgMask);
-        imshow("origin", img);  // show image
-
-        if (waitKey(10) == 27) {  // ESC(27) -> break
-            std::cout << "Closing the program ..." << std::endl;
-            break;
-        }
-    }
-
-
-    fgMask.copyTo(accuMask);
-
-
-    for(int n = 0; n <= 50; n++) {
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            break;
-        }
-
-        pMask->apply(img, fgMask);
-        bitwise_or(fgMask, accuMask, accuMask);
-
-        imshow("origin", img);  // show image
-        imshow("mask", accuMask);  // show image
-
-        if (waitKey(10) == 27) {  // ESC(27) -> break
-            std::cout << "Closing the program ..." << std::endl;
-            break;
-        }
-    }
-
-
-
-
-    std::cout << "Complete!" << std::endl;
 
 
     while (1) {
@@ -100,7 +45,7 @@ int takeRoad(void)
         }
 
         fgimg.release();
-        img.copyTo(fgimg, accuMask);
+        img.copyTo(fgimg, mask);
 
         // Detect pedestrians and vehicle
         pe_Detector.detect(fgimg);
@@ -116,7 +61,7 @@ int takeRoad(void)
 
 
         imshow("origin", img);  // show image
-        imshow("mask", accuMask);  // show image
+        imshow("mask", mask);  // show image
         imshow("detect", fgimg);  // show image
 
         if (waitKey(10) == 27) {  // ESC(27) -> break
