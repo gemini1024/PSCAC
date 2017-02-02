@@ -28,15 +28,17 @@ int takeRoad(void)
     }
 
 
-    UMat img, mask, fgimg; // using OpenCL
-
+    // Background recognition and removal
     BackgroundMask bgMask;
     bgMask.printProperties();
-    mask = bgMask.createBackgroundMask(vc);
+    bgMask.setRecognizeNumFrames(120);  // Default : 120 ( BackgroundSubtractorGMG's default value )
+    bgMask.setAccumulateNumFrames(200); // Default : 200
+    UMat mask = bgMask.createBackgroundMask(vc);
 
+
+    UMat img, fgimg; // using OpenCL ( UMat )
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
-
 
     while (1) {
         vc >> img; // Put the captured image in img
@@ -52,8 +54,6 @@ int takeRoad(void)
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
         }
-
-        // TODO : Must be detected quickly
         car_Detector.detect(fgimg);
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);

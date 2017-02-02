@@ -5,6 +5,7 @@
 #include "BackgroundMask.h"
 #include "CamDef.h"
 
+
 BackgroundMask::BackgroundMask() : accumulateNumFrames(200) {
 }
 
@@ -24,6 +25,7 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
     return accumulatedMask;
 }
 
+// Recognize a moving object and wait until a mask using GMG method is created
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
     UMat img;
 
@@ -35,9 +37,9 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
         }
 
         pMask->apply(img, bgMask);
-        imshow( CamDef::originalVideo, img );  // show image
+        imshow( CamDef::originalVideo, img );  // show original image
 
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC(27) -> exit
+        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
             std::cout << "Closing the program ..." << std::endl;
             exit(0);
         }
@@ -46,6 +48,7 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
     img.release();
 }
 
+// Determine and accumulate areas with moving objects
 void BackgroundMask::accumulateMasks(VideoCapture& vc) {
     assert(!bgMask.empty());
 
@@ -62,10 +65,10 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
         pMask->apply(img, bgMask);
         bitwise_or(bgMask, accumulatedMask, accumulatedMask);
 
-        imshow( CamDef::originalVideo, img );  // show image
-        imshow( CamDef::mask, accumulatedMask );  // show image
+        imshow( CamDef::originalVideo, img );  //  show original image
+        imshow( CamDef::mask, accumulatedMask );  // show background mask
 
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC(27) -> exit
+        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
             std::cout << "Closing the program ..." << std::endl;
             exit(0);
         }
@@ -94,8 +97,9 @@ void BackgroundMask::setAccumulateNumFrames(int num) {
 }
 
 
-
+// Only copy the foreground using the completed mask
 void BackgroundMask::locateForeground(UMat& src, UMat& dst) {
+    assert(!accumulatedMask.empty());
     dst.release();
     src.copyTo(dst, accumulatedMask);
 }

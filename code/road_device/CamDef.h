@@ -8,7 +8,7 @@
 
 namespace CamDef {
     enum {
-    	DELAY = 10,
+        DELAY = 10,
         ESC = 27
     };
     const std::string sampleVideo("sample.avi");

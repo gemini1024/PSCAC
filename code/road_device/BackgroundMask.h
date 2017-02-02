@@ -11,6 +11,8 @@
 
 using namespace cv;
 
+
+
 class BackgroundMask {
 private :
     // TODO : Select background recognition method
@@ -35,5 +37,6 @@ public :
     void setAccumulateNumFrames(int num);
     void locateForeground(UMat& src, UMat& dst);
 };
+
 
 #endif
