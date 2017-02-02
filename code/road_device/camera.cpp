@@ -9,6 +9,7 @@
 
 #include "BackgroundMask.h"
 #include "Detectors.h"
+#include "CamDef.h"
 #include "SigDef.h"
 
 using namespace cv; // openCV
@@ -20,14 +21,14 @@ int takeRoad(void)
     // vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
     // vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
-    VideoCapture vc("sample.avi"); // Load test video
+    VideoCapture vc( CamDef::sampleVideo ); // Load test video
     if (!vc.isOpened()) {
         std::cerr << "ERROR : Cannot open the camera" << std::endl;
         return false;
     }
 
 
-    UMat img, fgimg, mask; // using OpenCL
+    UMat img, mask, fgimg; // using OpenCL
 
     BackgroundMask bgMask;
     bgMask.printProperties();
@@ -44,8 +45,7 @@ int takeRoad(void)
             break;
         }
 
-        fgimg.release();
-        img.copyTo(fgimg, mask);
+        bgMask.locateForeground(img, fgimg);
 
         // Detect pedestrians and vehicle
         pe_Detector.detect(fgimg);
@@ -60,11 +60,11 @@ int takeRoad(void)
         }
 
 
-        imshow("origin", img);  // show image
-        imshow("mask", mask);  // show image
-        imshow("detect", fgimg);  // show image
+        imshow( CamDef::originalVideo, img );  // show original image
+        imshow( CamDef::mask, mask );  // show background mask
+        imshow( CamDef::resultVideo, fgimg );  // show image
 
-        if (waitKey(10) == 27) {  // ESC(27) -> break
+        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC(27) -> break
             std::cout << "Closing the program ..." << std::endl;
             break;
         }
