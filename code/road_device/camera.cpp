@@ -29,18 +29,35 @@ int takeRoad(void)
     UMat img, fgimg; // using OpenCL
     UMat fgMask; // Mask excluding moving objects
 
+    // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorMOG2();
+    // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorKNN();
     // Ptr<BackgroundSubtractor> pMask = bgsegm::createBackgroundSubtractorMOG();
-    Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorMOG2();
+    Ptr<bgsegm::BackgroundSubtractorGMG> pMask = bgsegm::createBackgroundSubtractorGMG();
+
+    // TODO : Remove output after adjusting properties
+    std::cout << "LearningRate : " << pMask->getDefaultLearningRate()
+    << "\nQuantizationLevels : " << pMask->getQuantizationLevels ()
+    << "\nSmoothingRadius : " << pMask->getSmoothingRadius()
+    << "\nUpdateBackgroundModel : " << pMask->getUpdateBackgroundModel()
+    << std::endl;
 
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 
+
+    int numFrame = 0, numinitializationFrame = pMask->getNumFrames();
+    std::cout << "Recognize the background ... " << std::endl;
 
     while (1) {
         vc >> img; // Put the captured image in img
         if (img.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             break;
+        }
+
+        // After numinitializationFrame, the frame is display on the screen
+        if( (++numFrame) == numinitializationFrame ) {
+            std::cout << "Complete!" << std::endl;
         }
         pMask->apply(img, fgMask);
         fgimg.release();
