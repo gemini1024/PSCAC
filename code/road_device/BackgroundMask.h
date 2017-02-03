@@ -7,7 +7,6 @@
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/bgsegm.hpp>
-#include <iostream>
 
 using namespace cv;
 
@@ -35,6 +34,7 @@ public :
     void printProperties();
     void setRecognizeNumFrames(int num);
     void setAccumulateNumFrames(int num);
+    void setLearningRate(double rate);
     void locateForeground(UMat& src, UMat& dst);
 };
 

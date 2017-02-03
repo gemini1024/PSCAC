@@ -33,6 +33,7 @@ int takeRoad(void)
     bgMask.printProperties();
     bgMask.setRecognizeNumFrames(120);  // Default : 120 ( BackgroundSubtractorGMG's default value )
     bgMask.setAccumulateNumFrames(200); // Default : 200
+    bgMask.setLearningRate(0.1); // Default : 0.025
     UMat mask = bgMask.createBackgroundMask(vc);
 
 
@@ -40,6 +41,8 @@ int takeRoad(void)
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 
+
+    std::cout << "Start Detection ..." << std::endl;
     while (1) {
         vc >> img; // Put the captured image in img
         if (img.empty())  {

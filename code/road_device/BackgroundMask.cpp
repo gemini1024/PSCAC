@@ -5,6 +5,9 @@
 #include "BackgroundMask.h"
 #include "CamDef.h"
 
+#include <opencv2/imgproc.hpp>
+#include <iostream>
+
 
 BackgroundMask::BackgroundMask() : accumulateNumFrames(200) {
 }
@@ -21,6 +24,13 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
     std::cout << "Creating Mask ... " << std::endl;
     accumulateMasks(vc);
     std::cout << "Mask creation Complete!" << std::endl;
+
+    std::cout << "Applying opening operation to Mask ... " << std::endl;
+    dilate(accumulatedMask, accumulatedMask, UMat());
+    erode(accumulatedMask, accumulatedMask, UMat());
+    std::cout << "Opening Complete!" << std::endl;
+
+    imshow( CamDef::mask, accumulatedMask );  // show background mask
 
     return accumulatedMask;
 }
@@ -55,7 +65,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
     UMat img;
     bgMask.copyTo(accumulatedMask);
 
-    for(int n = 0; n <= accumulateNumFrames; n++) {
+    for(int n = 0; n <= accumulateNumFrames; n+=2) {
         vc >> img;
         if (img.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
@@ -63,6 +73,18 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
         }
 
         pMask->apply(img, bgMask);
+        UMat tmpMask(bgMask);
+
+        vc >> img;
+        if (img.empty())  {
+            std::cerr << "ERROR : Unable to load frame" << std::endl;
+            exit(0);
+        }
+
+        pMask->apply(img, bgMask);
+
+        // Reduce noise
+        bitwise_and(tmpMask, bgMask, bgMask);
         bitwise_or(bgMask, accumulatedMask, accumulatedMask);
 
         imshow( CamDef::originalVideo, img );  //  show original image
@@ -80,7 +102,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 
 void BackgroundMask::printProperties() {
     std::cout << "InitializationFrames : " << pMask->getNumFrames()
-    << "LearningRate : " << pMask->getDefaultLearningRate()
+    << "\nLearningRate : " << pMask->getDefaultLearningRate()
     << "\nQuantizationLevels : " << pMask->getQuantizationLevels ()
     << "\nSmoothingRadius : " << pMask->getSmoothingRadius()
     << "\nUpdateBackgroundModel : " << pMask->getUpdateBackgroundModel()
@@ -94,6 +116,10 @@ void BackgroundMask::setRecognizeNumFrames(int num) {
 
 void BackgroundMask::setAccumulateNumFrames(int num) {
     accumulateNumFrames = num;
+}
+
+void BackgroundMask::setLearningRate(double rate) {
+    pMask->setDefaultLearningRate(rate);
 }
 
 
