@@ -25,7 +25,7 @@ bool Detector::isFound(void) {
 
 // Functions of PedestriansDetector
 PedestriansDetector::PedestriansDetector()
-: Detector("data/haarcascade_fullbody.xml" ) {
+: Detector("camera/data/haarcascade_fullbody.xml" ) {
 }
 
 PedestriansDetector::~PedestriansDetector() {
@@ -48,7 +48,7 @@ void PedestriansDetector::detect(UMat& img) {
 
 // Functions of VehiclesDetector
 VehiclesDetector::VehiclesDetector()
-: Detector("data/haarcascade_cars.xml") {
+: Detector("camera/data/haarcascade_cars.xml") {
 }
 
 VehiclesDetector::~VehiclesDetector() {

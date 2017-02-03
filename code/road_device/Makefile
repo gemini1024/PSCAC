@@ -2,15 +2,24 @@
 # using opencv
 
 CC = g++
-OBJS = main.o camera.o BackgroundMask.o Detectors.o SigDef.o
+DIRS = camera communication
+OBJS = main.o camera.o BackgroundMask.o Detectors.o SigDef.o ConnectServer.o
 TARGET = detect
 
 .SUFFIXES : .cpp .o
 
-all : $(TARGET)
+all : subobj $(TARGET)
+
+subobj :
+	@for dir in $(DIRS); do \
+	make -C $$dir || exit $?; \
+	done
 
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $(OBJS) `pkg-config opencv --cflags --libs`
 
 clean :
+	@for dir in $(DIRS); do \
+	make -C $$dir clean; \
+	done
 	rm -f $(OBJS) $(TARGET) core
