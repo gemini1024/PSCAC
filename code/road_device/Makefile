@@ -2,7 +2,7 @@
 # using opencv
 
 CC = g++
-OBJS = main.o camera.o Detectors.o SigDef.o
+OBJS = main.o camera.o BackgroundMask.o Detectors.o SigDef.o
 TARGET = detect
 
 .SUFFIXES : .cpp .o

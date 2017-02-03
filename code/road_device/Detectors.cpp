@@ -34,7 +34,7 @@ PedestriansDetector::~PedestriansDetector() {
 
 void PedestriansDetector::detect(UMat& img) {
     // Find Pedestrians
-    detector.detectMultiScale(img, found, 1.1, 2, 0, Size(40,70), Size(80,300));
+    detector.detectMultiScale(img, found, 1.1, 2, 0, Size(0,0), Size(160,300));
 
     // Draw Green Rectangle on Pedestrians
     for ( auto const& r : found ) {
