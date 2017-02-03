@@ -11,7 +11,7 @@ namespace CamDef {
         DELAY = 10,
         ESC = 27
     };
-    const std::string sampleVideo("sample.avi");
+    const std::string sampleVideo("camera/sample.avi");
     const std::string originalVideo("origin");
     const std::string mask("mask");
     const std::string resultVideo("detect");

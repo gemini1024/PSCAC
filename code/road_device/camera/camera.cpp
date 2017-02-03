@@ -10,7 +10,8 @@
 #include "BackgroundMask.h"
 #include "Detectors.h"
 #include "CamDef.h"
-#include "SigDef.h"
+
+#include "../communication/SigDef.h"
 
 using namespace cv; // openCV
 
