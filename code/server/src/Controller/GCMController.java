@@ -1,4 +1,4 @@
-package gcm;
+package Controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,19 +6,16 @@ import java.util.List;
 
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Message.Builder;
+
+import Vo.GCMVo;
+
 import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
-/**
- * GCM UTIL
- * 
- * gcm-server.jar, json-simple-1.1.1.jar 필요
- * 
- * @author
- *
- */
-public class GCMUtil {
+//GCM Util이 하는 일은 실제 GCM PUSH 를 보내는 역할을 합니다.
+
+public class GCMController {
 	static final String API_KEY = "AIzaSyArA50RlBZfVEdYS1CG8V5WC44QNZlYI-E"; // server api key
 	private static final int MAX_SEND_CNT = 999; // 1회 최대 전송 가능 수
 
@@ -37,12 +34,10 @@ public class GCMUtil {
 	/**
 	 * GCM Util 생성자 RegistrationId 셋팅, sender 셋팅, message 셋팅
 	 * 
-	 * @param reslist
-	 *            : RegistrationId
-	 * @param gcmVo
-	 *            : msg 정보
+	 * @param reslist : RegistrationId
+	 * @param gcmVo : msg 정보
 	 */
-	public GCMUtil(List<String> reslist, GCMVo gcmVo) {
+	public GCMController(List<String> reslist, GCMVo gcmVo) {
 		sender = new Sender(API_KEY);
 		this.resList = reslist;
 		setMessage(gcmVo);

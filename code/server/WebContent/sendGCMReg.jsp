@@ -3,8 +3,10 @@
 <%@page import="java.util.Map"%>
 <%@ page language="java" contentType="text/json; charset=EUC-KR"
     pageEncoding="EUC-KR" import="gcm.*"%>
+
+
 <%
- 
+	//¾Û¿¡¼­ º¸³¾°æ¿ì
     System.out.println("*********************************************************");
     System.out.println("REG È¹µæ");
     System.out.println("KEY : " + request.getParameter("KEY"));
@@ -16,5 +18,4 @@
     rtnMap.put("DATA", URLEncoder.encode("µî·ÏµÇ¾ú½À´Ï´Ù.", "UTF-8"));
     rtnMap.put("DATA1", "END1");
     out.print(rtnMap.toString());
- 
 %>

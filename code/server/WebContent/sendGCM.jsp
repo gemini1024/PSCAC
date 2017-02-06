@@ -1,4 +1,3 @@
-
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 
@@ -7,8 +6,8 @@
 <%
  
     //전달할 PUSH 내용
-    String title = "PUSH 제목 입니다.";
-    String msg = "PUSH 내용입니다 ^^ !!!!";
+    String title = "gps 좌표 : 25.35.94";
+    String msg = "위험상황 : 보통";
     
     // GCM 정보 셋팅
     GCMVo gcmVo = new GCMVo();
