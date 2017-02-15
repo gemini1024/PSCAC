@@ -16,7 +16,7 @@ import com.google.android.gcm.server.Sender;
 //GCM Util이 하는 일은 실제 GCM PUSH 를 보내는 역할을 합니다.
 
 public class GCMController {
-	static final String API_KEY = "AIzaSyArA50RlBZfVEdYS1CG8V5WC44QNZlYI-E"; // server api key
+	static final String API_KEY = "AIzaSyDjdwnZEpzbO4JDtNy7tCDQE83r61VIGQY"; // server api key
 	private static final int MAX_SEND_CNT = 999; // 1회 최대 전송 가능 수
 
 	// android 에서 받을 extra key (android app 과 동일해야 함)
