@@ -37,14 +37,15 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 
 // Recognize a moving object and wait until a mask using GMG method is created
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
-    UMat img;
+    UMat img, timg;
 
     for(int n = 0; n <= pMask->getNumFrames()+1; n++) {
-        vc >> img;
-        if (img.empty())  {
+        vc >> timg;
+        if (timg.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             exit(0);
         }
+        resize(timg, img, Size(), 0.5, 0.5);
 
         pMask->apply(img, bgMask);
         imshow( CamDef::originalVideo, img );  // show original image
@@ -62,30 +63,27 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
 void BackgroundMask::accumulateMasks(VideoCapture& vc) {
     assert(!bgMask.empty());
 
-    UMat img;
+    UMat img, timg;
     bgMask.copyTo(accumulatedMask);
+    int andFrames = 5;
 
-    for(int n = 0; n <= accumulateNumFrames; n+=2) {
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            exit(0);
-        }
+    for(int n = 0; n <= accumulateNumFrames; n += andFrames) {
 
-        pMask->apply(img, bgMask);
         UMat tmpMask(bgMask);
 
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            exit(0);
+        for(int m=0; m<andFrames; m++) {
+            vc >> timg;
+            if (timg.empty())  {
+                std::cerr << "ERROR : Unable to load frame" << std::endl;
+                exit(0);
+            }
+            resize(timg, img, Size(), 0.5, 0.5);
+
+            pMask->apply(img, bgMask);
+            bitwise_and(bgMask, tmpMask, tmpMask);
         }
-
-        pMask->apply(img, bgMask);
-
         // Reduce noise
-        bitwise_and(tmpMask, bgMask, bgMask);
-        bitwise_or(bgMask, accumulatedMask, accumulatedMask);
+        bitwise_or(tmpMask, accumulatedMask, accumulatedMask);
 
         imshow( CamDef::originalVideo, img );  //  show original image
         imshow( CamDef::mask, accumulatedMask );  // show background mask

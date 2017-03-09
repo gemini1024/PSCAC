@@ -38,27 +38,29 @@ int takeRoad(void)
     UMat mask = bgMask.createBackgroundMask(vc);
 
 
-    UMat img, fgimg; // using OpenCL ( UMat )
+    UMat img, timg, fgimg; // using OpenCL ( UMat )
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 
 
     std::cout << "Start Detection ..." << std::endl;
     while (1) {
-        vc >> img; // Put the captured image in img
-        if (img.empty())  {
+        vc >> timg; // Put the captured image in img
+        if (timg.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             break;
         }
+        resize(timg, img, Size(), 0.5, 0.5);
+
 
         bgMask.locateForeground(img, fgimg);
 
         // Detect pedestrians and vehicle
-        pe_Detector.detect(fgimg);
+        pe_Detector.detect(img);
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
         }
-        car_Detector.detect(fgimg);
+        car_Detector.detect(img);
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
         }
