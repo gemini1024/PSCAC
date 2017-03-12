@@ -2,7 +2,7 @@
 <%@page import="java.util.HashMap"%>
 <%@page import="java.util.Map"%>
 <%@ page language="java" contentType="text/json; charset=EUC-KR"
-    pageEncoding="EUC-KR" import="gcm.*"%>
+    pageEncoding="EUC-KR" import="Vo.*"%>
 
 
 <%
