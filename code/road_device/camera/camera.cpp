@@ -59,10 +59,24 @@ int takeRoad(void)
         pe_Detector.detect(img);
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
+
+            std::vector<Rect> foundObj = pe_Detector.getFoundObjects();
+            for( auto const& r : foundObj ) {
+                std::cout << "Human : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
+                << r.br().x << "," << r.br().y << "), md = ("
+                << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
+            }
         }
         car_Detector.detect(img);
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
+
+            std::vector<Rect> foundObj = car_Detector.getFoundObjects();
+            for( auto const& r : foundObj ) {
+                std::cout << "Car : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
+                << r.br().x << "," << r.br().y << "), md = ("
+                << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
+            }
         }
 
 

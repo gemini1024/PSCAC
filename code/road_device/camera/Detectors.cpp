@@ -20,6 +20,10 @@ bool Detector::isFound(void) {
     return !found.empty();
 }
 
+std::vector<Rect> Detector::getFoundObjects(void) {
+    return found;
+}
+
 
 
 
