@@ -12,7 +12,7 @@ namespace CamDef {
         ESC = 27
     };
     // const std::string sampleVideo("camera/captured_video.mp4");
-    const std::string sampleVideo("camera/sample.avi");
+    const std::string sampleVideo("camera/sample2.mp4");
     const std::string originalVideo("origin");
     const std::string mask("mask");
     const std::string resultVideo("detect");

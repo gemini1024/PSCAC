@@ -33,7 +33,7 @@ int takeRoad(void)
     BackgroundMask bgMask;
     bgMask.printProperties();
     bgMask.setRecognizeNumFrames(120);  // Default : 120 ( BackgroundSubtractorGMG's default value )
-    bgMask.setAccumulateNumFrames(200); // Default : 200
+    bgMask.setAccumulateNumFrames(800); // Default : 200
     bgMask.setLearningRate(0.1); // Default : 0.025
     UMat mask = bgMask.createBackgroundMask(vc);
 
@@ -50,13 +50,13 @@ int takeRoad(void)
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             break;
         }
-        resize(timg, img, Size(), 0.5, 0.5);
+        resize(timg, img, Size(), 1, 1);
 
 
         bgMask.locateForeground(img, fgimg);
 
         // Detect pedestrians and vehicle
-        pe_Detector.detect(img);
+        pe_Detector.detect(fgimg);
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
 
@@ -67,7 +67,7 @@ int takeRoad(void)
                 << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
             }
         }
-        car_Detector.detect(img);
+        car_Detector.detect(fgimg);
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
 

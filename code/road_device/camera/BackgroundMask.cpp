@@ -45,7 +45,7 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             exit(0);
         }
-        resize(timg, img, Size(), 0.5, 0.5);
+        resize(timg, img, Size(), 1, 1);
 
         pMask->apply(img, bgMask);
         imshow( CamDef::originalVideo, img );  // show original image
@@ -77,7 +77,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
                 std::cerr << "ERROR : Unable to load frame" << std::endl;
                 exit(0);
             }
-            resize(timg, img, Size(), 0.5, 0.5);
+            resize(timg, img, Size(), 1, 1);
 
             pMask->apply(img, bgMask);
             bitwise_and(bgMask, tmpMask, tmpMask);
