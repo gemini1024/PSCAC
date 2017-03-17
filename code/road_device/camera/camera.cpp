@@ -6,6 +6,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/bgsegm.hpp>
 #include <iostream>
+#include <thread>
 
 #include "BackgroundMask.h"
 #include "Detectors.h"
@@ -14,6 +15,29 @@
 #include "../communication/SigDef.h"
 
 using namespace cv; // openCV
+
+
+void detectObjects(UMat& fgimg, Detector& detector, int signo) {
+    detector.detect(fgimg);
+    if( detector.isFound() ) {
+        sendSignalToParentProcess(signo);
+
+        std::string objtype;
+        if ( signo == SigDef::SIG_FOUND_HUMAN ) {
+            objtype = "Human";
+        } else {
+            objtype = "Car";
+        }
+
+        const std::vector<Rect>& foundObj = detector.getFoundObjects();
+        for( auto const& r : foundObj ) {
+            std::cout << objtype << " : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
+            << r.br().x << "," << r.br().y << "), md = ("
+            << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
+        }
+    }
+}
+
 
 int takeRoad(void)
 {
@@ -51,32 +75,13 @@ int takeRoad(void)
             break;
         }
 
-
         bgMask.locateForeground(img, fgimg);
 
         // Detect pedestrians and vehicle
-        pe_Detector.detect(fgimg);
-        if( pe_Detector.isFound() ) {
-            sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
-
-            const std::vector<Rect>& foundObj = pe_Detector.getFoundObjects();
-            for( auto const& r : foundObj ) {
-                std::cout << "Human : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
-                << r.br().x << "," << r.br().y << "), md = ("
-                << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
-            }
-        }
-        car_Detector.detect(fgimg);
-        if( car_Detector.isFound() ) {
-            sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
-
-            const std::vector<Rect>& foundObj = car_Detector.getFoundObjects();
-            for( auto const& r : foundObj ) {
-                std::cout << "Car : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
-                << r.br().x << "," << r.br().y << "), md = ("
-                << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
-            }
-        }
+        std::thread t1(detectObjects, std::ref(fgimg), std::ref(pe_Detector), SigDef::SIG_FOUND_HUMAN);
+        std::thread t2(detectObjects, std::ref(fgimg), std::ref(car_Detector), SigDef::SIG_FOUND_CAR);
+        t1.join();
+        t2.join();
 
 
         imshow( CamDef::originalVideo, img );  // show original image
