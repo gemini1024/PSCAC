@@ -22,7 +22,7 @@ public:
     virtual ~Detector();
     virtual void detect(UMat& img) = 0;
     bool isFound(void);
-    std::vector<Rect> getFoundObjects(void);
+    const std::vector<Rect>& getFoundObjects(void);
 };
 
 

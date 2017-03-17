@@ -38,19 +38,18 @@ int takeRoad(void)
     UMat mask = bgMask.createBackgroundMask(vc);
 
 
-    UMat img, timg, fgimg; // using OpenCL ( UMat )
+    UMat img, fgimg; // using OpenCL ( UMat )
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 
 
     std::cout << "Start Detection ..." << std::endl;
     while (1) {
-        vc >> timg; // Put the captured image in img
-        if (timg.empty())  {
+        vc >> img; // Put the captured image in img
+        if (img.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             break;
         }
-        resize(timg, img, Size(), 1, 1);
 
 
         bgMask.locateForeground(img, fgimg);
@@ -60,7 +59,7 @@ int takeRoad(void)
         if( pe_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_HUMAN);
 
-            std::vector<Rect> foundObj = pe_Detector.getFoundObjects();
+            const std::vector<Rect>& foundObj = pe_Detector.getFoundObjects();
             for( auto const& r : foundObj ) {
                 std::cout << "Human : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
                 << r.br().x << "," << r.br().y << "), md = ("
@@ -71,7 +70,7 @@ int takeRoad(void)
         if( car_Detector.isFound() ) {
             sendSignalToParentProcess(SigDef::SIG_FOUND_CAR);
 
-            std::vector<Rect> foundObj = car_Detector.getFoundObjects();
+            const std::vector<Rect>& foundObj = car_Detector.getFoundObjects();
             for( auto const& r : foundObj ) {
                 std::cout << "Car : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
                 << r.br().x << "," << r.br().y << "), md = ("

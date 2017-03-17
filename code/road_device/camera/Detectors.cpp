@@ -20,7 +20,7 @@ bool Detector::isFound(void) {
     return !found.empty();
 }
 
-std::vector<Rect> Detector::getFoundObjects(void) {
+const std::vector<Rect>& Detector::getFoundObjects(void) {
     return found;
 }
 
@@ -29,7 +29,7 @@ std::vector<Rect> Detector::getFoundObjects(void) {
 
 // Functions of PedestriansDetector
 PedestriansDetector::PedestriansDetector()
-: Detector("camera/data/haarcascade_fullbody.xml" ) {
+: Detector("camera/data/funvision_cascade_pedestrians.xml" ) {
 }
 
 PedestriansDetector::~PedestriansDetector() {
@@ -38,7 +38,8 @@ PedestriansDetector::~PedestriansDetector() {
 
 void PedestriansDetector::detect(UMat& img) {
     // Find Pedestrians
-    detector.detectMultiScale(img, found, 1.1, 2, 0, Size(0,0), Size(160,300));
+    // detector.detectMultiScale(img, found, 1.1, 2, 0, Size(0,0), Size(160,300));
+    detector.detectMultiScale(img, found, 1.04, 4, 1, Size(30,80), Size(80,200));
 
     // Draw Green Rectangle on Pedestrians
     for ( auto const& r : found ) {
@@ -52,7 +53,7 @@ void PedestriansDetector::detect(UMat& img) {
 
 // Functions of VehiclesDetector
 VehiclesDetector::VehiclesDetector()
-: Detector("camera/data/haarcascade_cars.xml") {
+: Detector("camera/data/funvision_cascade_vehicles.xml") {
 }
 
 VehiclesDetector::~VehiclesDetector() {
@@ -61,8 +62,8 @@ VehiclesDetector::~VehiclesDetector() {
 
 void VehiclesDetector::detect(UMat& img) {
     // Find Vehicles
-    // TODO : Reduce false alarm rate
-    detector.detectMultiScale(img, found, 1.1, 2, 0, Size(30,30), Size(480,480));
+    // detector.detectMultiScale(img, found, 1.1, 2, 0, Size(30,30), Size(480,480));
+    detector.detectMultiScale(img, found, 1.1, 5, 1, Size(20,20), Size(600,600));
 
     // Draw Red Rectangle on Vehicles
     for ( auto const& r : found ) {

@@ -37,15 +37,14 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 
 // Recognize a moving object and wait until a mask using GMG method is created
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
-    UMat img, timg;
+    UMat img;
 
     for(int n = 0; n <= pMask->getNumFrames()+1; n++) {
-        vc >> timg;
-        if (timg.empty())  {
+        vc >> img;
+        if (img.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
             exit(0);
         }
-        resize(timg, img, Size(), 1, 1);
 
         pMask->apply(img, bgMask);
         imshow( CamDef::originalVideo, img );  // show original image
@@ -63,7 +62,7 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
 void BackgroundMask::accumulateMasks(VideoCapture& vc) {
     assert(!bgMask.empty());
 
-    UMat img, timg;
+    UMat img;
     bgMask.copyTo(accumulatedMask);
     int andFrames = 5;
 
@@ -72,26 +71,26 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
         UMat tmpMask(bgMask);
 
         for(int m=0; m<andFrames; m++) {
-            vc >> timg;
-            if (timg.empty())  {
+            vc >> img;
+            if (img.empty())  {
                 std::cerr << "ERROR : Unable to load frame" << std::endl;
                 exit(0);
             }
-            resize(timg, img, Size(), 1, 1);
 
             pMask->apply(img, bgMask);
             bitwise_and(bgMask, tmpMask, tmpMask);
+
+            imshow( CamDef::originalVideo, img );  //  show original image
+            imshow( CamDef::mask, accumulatedMask );  // show background mask
+
+            if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
+                std::cout << "Closing the program ..." << std::endl;
+                exit(0);
+            }
         }
+
         // Reduce noise
         bitwise_or(tmpMask, accumulatedMask, accumulatedMask);
-
-        imshow( CamDef::originalVideo, img );  //  show original image
-        imshow( CamDef::mask, accumulatedMask );  // show background mask
-
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
-            std::cout << "Closing the program ..." << std::endl;
-            exit(0);
-        }
     }
 
     img.release();
