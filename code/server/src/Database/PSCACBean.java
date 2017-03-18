@@ -1,8 +1,12 @@
 package Database;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 import Vo.PSCACVo;
 
@@ -86,17 +90,16 @@ public class PSCACBean {
 		return true;
 	}
 
-	// 신규 주소록 메시지 추가 메서드
-	public boolean insertDB(PSCACVo vo) {
+	// 신규 gps 추가 메서드
+	public boolean insertDB(String gps) {
 		connect();
 		// sql 문자열 , id는 자동 등록 되므로 입력하지 않는다.
 
-		String sql = "insert into vo(gps, status) values(?,?)";
+		String sql = "insert into vo(gps) values(?)";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, vo.getGps());
-			pstmt.setString(2, vo.getStatus());
+			pstmt.setString(1, gps);
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
@@ -108,8 +111,37 @@ public class PSCACBean {
 		return true;
 	}
 
-	// 특정 id 가져오는 메서드
-	public PSCACVo getDB(String id) throws UnsupportedEncodingException {
+	// 특정 gps의 PSCACVo를 가져오는 메서드
+	public PSCACVo getDBFgps(String gps) throws UnsupportedEncodingException {
+		connect();
+
+	String sql = "select * from vo where gps=?";
+	PSCACVo vo = new PSCACVo();
+
+	try
+	{
+		pstmt = conn.prepareStatement(sql);
+		pstmt.setString(1, gps);
+		ResultSet rs = pstmt.executeQuery();
+
+		// 데이터가 하나만 있으므로 rs.next()를 한번만 실행 한다. rs.next();
+		vo.setId(rs.getString("id"));
+		vo.setGps(rs.getString("gps"));
+		vo.setStatus(rs.getString("status"));
+
+		rs.close();
+	}catch(SQLException e)
+	{
+		e.printStackTrace();
+	}finally
+	{
+		disconnect();
+	}return vo;
+	}
+
+	
+	// 특정 id의 PSCACVo를 가져오는 메서드
+	public PSCACVo getDBFId(String id) throws UnsupportedEncodingException {
 		connect();
 
 	String sql = "select * from vo where id=?";

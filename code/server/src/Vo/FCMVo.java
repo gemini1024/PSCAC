@@ -3,7 +3,7 @@ package Vo;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
  
-public class GCMVo {
+public class FCMVo {
     // android 로 보낼 정보
     private String title = "제목입니다.";
     private String msg = "내용입니다.";
