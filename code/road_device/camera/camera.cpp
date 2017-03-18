@@ -45,6 +45,7 @@ int takeRoad(void)
     // VideoCapture vc(0);
     // vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
     // vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+    // vc.set(CV_PROP_FPS, 20);
 
     VideoCapture vc( CamDef::sampleVideo ); // Load test video
     if (!vc.isOpened()) {
@@ -55,10 +56,10 @@ int takeRoad(void)
 
     // Background recognition and removal
     BackgroundMask bgMask;
-    bgMask.printProperties();
-    bgMask.setRecognizeNumFrames(120);  // Default : 120 ( BackgroundSubtractorGMG's default value )
+    bgMask.setRecognizeNumFrames(24);  // Default : 120 ( BackgroundSubtractorGMG's default value )
     bgMask.setAccumulateNumFrames(800); // Default : 200
-    bgMask.setLearningRate(0.1); // Default : 0.025
+    bgMask.setLearningRate(0.025); // Default : 0.025
+    bgMask.printProperties();
     UMat mask = bgMask.createBackgroundMask(vc);
 
 

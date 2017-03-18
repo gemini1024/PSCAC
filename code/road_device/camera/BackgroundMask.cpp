@@ -64,7 +64,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 
     UMat img;
     bgMask.copyTo(accumulatedMask);
-    int andFrames = 5;
+    int andFrames = 20;
 
     for(int n = 0; n <= accumulateNumFrames; n += andFrames) {
 
