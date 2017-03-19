@@ -49,8 +49,8 @@ void SigDef::foundPedestrians(void) {
     // TODO : send data to Server
     std::cout<< "Found  Pedestrians" << std::endl;
 
-    static ConnectServer connServ("192.168.0.254", 80);
-    connServ.sendMessage("Found  Pedestrians");
+    // static ConnectServer connServ("192.168.0.254", 80);
+    // connServ.sendMessage("Found  Pedestrians");
 }
 
 void SigDef::foundVehicles(void) {

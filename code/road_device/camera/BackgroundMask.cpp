@@ -64,36 +64,33 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 
     UMat img;
     bgMask.copyTo(accumulatedMask);
+    int andFrames = 20;
 
-    for(int n = 0; n <= accumulateNumFrames; n+=2) {
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            exit(0);
-        }
+    for(int n = 0; n <= accumulateNumFrames; n += andFrames) {
 
-        pMask->apply(img, bgMask);
         UMat tmpMask(bgMask);
 
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            exit(0);
-        }
+        for(int m=0; m<andFrames; m++) {
+            vc >> img;
+            if (img.empty())  {
+                std::cerr << "ERROR : Unable to load frame" << std::endl;
+                exit(0);
+            }
 
-        pMask->apply(img, bgMask);
+            pMask->apply(img, bgMask);
+            bitwise_and(bgMask, tmpMask, tmpMask);
+
+            imshow( CamDef::originalVideo, img );  //  show original image
+            imshow( CamDef::mask, accumulatedMask );  // show background mask
+
+            if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
+                std::cout << "Closing the program ..." << std::endl;
+                exit(0);
+            }
+        }
 
         // Reduce noise
-        bitwise_and(tmpMask, bgMask, bgMask);
-        bitwise_or(bgMask, accumulatedMask, accumulatedMask);
-
-        imshow( CamDef::originalVideo, img );  //  show original image
-        imshow( CamDef::mask, accumulatedMask );  // show background mask
-
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
-            std::cout << "Closing the program ..." << std::endl;
-            exit(0);
-        }
+        bitwise_or(tmpMask, accumulatedMask, accumulatedMask);
     }
 
     img.release();
