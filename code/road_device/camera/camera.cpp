@@ -57,7 +57,7 @@ int takeRoad(void)
     // Background recognition and removal
     BackgroundMask bgMask;
     bgMask.setRecognizeNumFrames(24);  // Default : 120 ( BackgroundSubtractorGMG's default value )
-    bgMask.setAccumulateNumFrames(800); // Default : 200
+    bgMask.setAccumulateNumFrames(600); // Default : 200
     bgMask.setLearningRate(0.025); // Default : 0.025
     bgMask.printProperties();
     UMat mask = bgMask.createBackgroundMask(vc);
