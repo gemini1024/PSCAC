@@ -20,7 +20,7 @@ using namespace cv; // openCV
 void detectObjects(UMat& fgimg, Detector& detector, int signo) {
     detector.detect(fgimg);
     if( detector.isFound() ) {
-        sendSignalToParentProcess(signo);
+//        sendSignalToParentProcess(signo);
 
         std::string objtype;
         if ( signo == SigDef::SIG_FOUND_HUMAN ) {
