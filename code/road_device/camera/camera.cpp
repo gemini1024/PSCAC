@@ -17,6 +17,8 @@
 using namespace cv; // openCV
 
 
+
+// Detect objects by each detectors.
 void detectObjects(UMat& fgimg, Detector& detector, int signo) {
     detector.detect(fgimg);
     if( detector.isFound() ) {
@@ -29,6 +31,8 @@ void detectObjects(UMat& fgimg, Detector& detector, int signo) {
             objtype = "Car";
         }
 
+        // TODO : Store the coordinates for a period of time and predict the risk situation.
+        // Outputs the coordinates of the found objects in frame.
         const std::vector<Rect>& foundObj = detector.getFoundObjects();
         for( auto const& r : foundObj ) {
             std::cout << objtype << " : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
@@ -41,26 +45,34 @@ void detectObjects(UMat& fgimg, Detector& detector, int signo) {
 
 int takeRoad(void)
 {
+    // Select the source of the video.
     // Connect camera
-    // VideoCapture vc(0);
-    // vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-    // vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-    // vc.set(CV_PROP_FPS, 20);
-
-    VideoCapture vc( CamDef::sampleVideo ); // Load test video
+    /*
+    VideoCapture vc(0);
+    vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+    vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+    vc.set(CV_CAP_PROP_FPS, 12);
+    */
+    // Load test video
+    VideoCapture vc( CamDef::sampleVideo );
     if (!vc.isOpened()) {
         std::cerr << "ERROR : Cannot open the camera" << std::endl;
         return false;
     }
 
 
+
+
     // Background recognition and removal
     BackgroundMask bgMask;
     bgMask.setRecognizeNumFrames(24);  // Default : 120 ( BackgroundSubtractorGMG's default value )
-    bgMask.setAccumulateNumFrames(600); // Default : 200
+    bgMask.setNoiseRemovalNumFrames( vc.get(CV_CAP_PROP_FPS) ); // Default : 12
+    bgMask.setAccumulateNumFrames(600); // Default : 600
     bgMask.setLearningRate(0.025); // Default : 0.025
     bgMask.printProperties();
     UMat mask = bgMask.createBackgroundMask(vc);
+
+
 
 
     UMat img, fgimg; // using OpenCL ( UMat )
@@ -76,6 +88,8 @@ int takeRoad(void)
             break;
         }
 
+
+        // Exclude areas excluding road areas in the original image.
         bgMask.locateForeground(img, fgimg);
 
         // Detect pedestrians and vehicle
@@ -85,19 +99,25 @@ int takeRoad(void)
         t2.join();
 
 
+
+        // Print out the images in the window.
         imshow( CamDef::originalVideo, img );  // show original image
         imshow( CamDef::mask, mask );  // show background mask
         imshow( CamDef::resultVideo, fgimg );  // show image
 
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC(27) -> break
-            std::cout << "Closing the program ..." << std::endl;
+        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC -> break
+            std::cout << "Closing the camera process ..." << std::endl;
             break;
         }
     }
 
-    vc.release();
 
+    // Return resources.
     destroyAllWindows();
+    img.release();
+    fgimg.release();
+    mask.release();
+    vc.release();
 
     return true;
 }

@@ -16,14 +16,16 @@ Detector::~Detector() {
 }
 
 
+// Determine if the objects found were found
 bool Detector::isFound(void) {
     return !found.empty();
 }
 
+// Returns the coordinates of the objects found in frame.
+// the returned coordinate values are intended for output and can not be changed.
 const std::vector<Rect>& Detector::getFoundObjects(void) {
     return found;
 }
-
 
 
 

@@ -28,6 +28,7 @@ int main(int argc, char** argv)
         default : // Alert
             // TODO : Send Warning Message until the camera is shut down
             while(waitpid(pid, NULL, 0) != pid);
+            cout<<"Closing the communication process ..."<<endl;
             break;
     }
 

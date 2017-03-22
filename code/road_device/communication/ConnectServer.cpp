@@ -7,6 +7,7 @@
 #include <iostream>
 
 ConnectServer::ConnectServer(const string hostName, const int portNum) {
+    // Open the socket. Currently UDP. Changeable.
     if( (sd = socket(AF_INET, SOCK_DGRAM, 0)) == -1 ) {
         perror("socket");
         exit(1);

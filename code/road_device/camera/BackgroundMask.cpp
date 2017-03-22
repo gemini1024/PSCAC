@@ -9,7 +9,8 @@
 #include <iostream>
 
 
-BackgroundMask::BackgroundMask() : accumulateNumFrames(200) {
+BackgroundMask::BackgroundMask()
+: accumulateNumFrames(600), noiseRemovalNumFrames(12) {
 }
 
 BackgroundMask::~BackgroundMask() {
@@ -39,7 +40,7 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
     UMat img;
 
-    for(int n = 0; n <= pMask->getNumFrames()+1; n++) {
+    for(int n = 0; n < pMask->getNumFrames(); n++) {
         vc >> img;
         if (img.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
@@ -64,13 +65,12 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 
     UMat img;
     bgMask.copyTo(accumulatedMask);
-    int andFrames = 20;
 
-    for(int n = 0; n <= accumulateNumFrames; n += andFrames) {
+    for(int n = 0; n <= accumulateNumFrames; n += noiseRemovalNumFrames) {
 
         UMat tmpMask(bgMask);
 
-        for(int m=0; m<andFrames; m++) {
+        for(int m=0; m<noiseRemovalNumFrames; m++) {
             vc >> img;
             if (img.empty())  {
                 std::cerr << "ERROR : Unable to load frame" << std::endl;
@@ -108,6 +108,11 @@ void BackgroundMask::printProperties() {
 
 void BackgroundMask::setRecognizeNumFrames(int num) {
     pMask->setNumFrames(num);
+}
+
+// Specifies the number of frames to be used for noise removal
+void BackgroundMask::setNoiseRemovalNumFrames(int num) {
+    noiseRemovalNumFrames = num;
 }
 
 
