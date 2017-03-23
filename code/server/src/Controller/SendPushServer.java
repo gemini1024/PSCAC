@@ -41,20 +41,22 @@ public class SendPushServer {
 
 		Map<String, Object> testVO = new HashMap<String, Object>();
 
-		Message message = new Message();
+		Message message = new Message();		
 		message.setTitle(fcmvo.getTitle());
-		message.setContent(fcmvo.getMsg());
-		message.setImgUrl("");
-		message.setLink("");
-
+		//message.setContent(fcmvo.getMsg());
+		
+		message.setLatitude(fcmvo.getLatitude());
+		message.setLongitude(fcmvo.getLongitude());
+		message.setAlarm("default");
+		
 		String to = "/topics/alert";
 
 		Gson gson = new Gson();
 
-		testVO.put("message", message);
+		//testVO.put("message", message);
 
 		Map<String, Object> data = new HashMap<>();
-		data.put("data", testVO);
+		data.put("data", message);
 		data.put("to", to);
 		String jsonStr = gson.toJson(data, HashMap.class);
 
@@ -90,7 +92,15 @@ public class SendPushServer {
 		SendPushServer send = new SendPushServer();
 		FCMVo fcmvo = new FCMVo();
 		
-		fcmvo.setMsg(".-w-36-.-g-127-.-alt-default-.");
+		//E동
+		fcmvo.setLatitude("37.3396026");
+		fcmvo.setLongitude("126.7347525");
+		
+		//tip
+		//fcmvo.setLatitude("37.3410697");
+		//fcmvo.setLongitude("126.7331218");
+		
+		fcmvo.setAlarm("default");
 		fcmvo.setTitle("alert");
 		
 		try {

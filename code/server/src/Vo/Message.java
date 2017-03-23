@@ -7,6 +7,34 @@ public class Message {
 	private String imgUrl;
 	private String link;
 	
+	private String latitude;
+	private String longitude;
+	private String alarm;
+	
+	public String getAlarm() {
+		return alarm;
+	}
+
+	public void setAlarm(String alarm) {
+		this.alarm = alarm;
+	}
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
 	public Message() {
 		// TODO Auto-generated constructor stub
 	}
