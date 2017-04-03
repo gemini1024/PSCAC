@@ -22,7 +22,7 @@ using namespace cv; // openCV
 void detectObjects(UMat& fgimg, Detector& detector, int signo) {
     detector.detect(fgimg);
     if( detector.isFound() ) {
-//        sendSignalToParentProcess(signo);
+       sendSignalToParentProcess(signo);
 
         std::string objtype;
         if ( signo == SigDef::SIG_FOUND_HUMAN ) {
@@ -79,6 +79,8 @@ int takeRoad(void)
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
 
+    car_Detector.initRoadImg(mask);
+
 
     std::cout << "Start Detection ..." << std::endl;
     while (1) {
@@ -103,6 +105,7 @@ int takeRoad(void)
         // Print out the images in the window.
         imshow( CamDef::originalVideo, img );  // show original image
         imshow( CamDef::mask, mask );  // show background mask
+        imshow( "roadImg", car_Detector.getRoadImg() );  // show background mask
         imshow( CamDef::resultVideo, fgimg );  // show image
 
         if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC -> break

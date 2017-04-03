@@ -26,10 +26,10 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
     accumulateMasks(vc);
     std::cout << "Mask creation Complete!" << std::endl;
 
-    std::cout << "Applying opening operation to Mask ... " << std::endl;
+    std::cout << "Reducing noise from the mask ... " << std::endl;
     dilate(accumulatedMask, accumulatedMask, UMat());
     erode(accumulatedMask, accumulatedMask, UMat());
-    std::cout << "Opening Complete!" << std::endl;
+    std::cout << "Reducing noise Complete!" << std::endl;
 
     imshow( CamDef::mask, accumulatedMask );  // show background mask
 
@@ -90,6 +90,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
         }
 
         // Reduce noise
+        erode(tmpMask, tmpMask, UMat());
         bitwise_or(tmpMask, accumulatedMask, accumulatedMask);
     }
 

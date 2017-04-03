@@ -70,5 +70,15 @@ void VehiclesDetector::detect(UMat& img) {
     // Draw Red Rectangle on Vehicles
     for ( auto const& r : found ) {
         rectangle(img, r.tl(), r.br(), Scalar(0,0,255), 3);
+        rectangle(roadImg, Point(r.tl().x, r.br().y+10), r.br(), Scalar(0,0,255), -1);
     }
+}
+
+void VehiclesDetector::initRoadImg(UMat& mask) {
+    roadImg = mask;
+    cvtColor(roadImg, roadImg, CV_GRAY2BGR);
+}
+
+const UMat& VehiclesDetector::getRoadImg(void) {
+    return roadImg;
 }

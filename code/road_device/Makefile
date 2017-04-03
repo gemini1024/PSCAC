@@ -16,7 +16,7 @@ subobj :
 	done
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $(OBJS) `pkg-config opencv --cflags --libs` -pthread
+	$(CC) -o $@ $(OBJS) `pkg-config opencv --cflags --libs` -pthread -O2
 
 clean :
 	@for dir in $(DIRS); do \
