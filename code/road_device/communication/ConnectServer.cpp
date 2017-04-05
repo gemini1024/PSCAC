@@ -6,6 +6,9 @@
 #include <string.h>
 #include <iostream>
 
+// Initialize socket descriptor and set server location.
+// param - hostName : server ip
+// param - portNum : server port
 ConnectServer::ConnectServer(const string hostName, const int portNum) {
     // Open the socket. Currently UDP. Changeable.
     if( (sd = socket(AF_INET, SOCK_DGRAM, 0)) == -1 ) {
@@ -19,10 +22,14 @@ ConnectServer::ConnectServer(const string hostName, const int portNum) {
     sin.sin_addr.s_addr = inet_addr(hostName.c_str());
 }
 
+// Terminates the connection with the server
 ConnectServer::~ConnectServer() {
     close(sd);
 }
 
+
+// Send the message to the server.
+// param - message : Message to send to server
 void ConnectServer::sendMessage(const string message) {
     char buf[MESSAGE_SIZE];
 

@@ -17,7 +17,7 @@ void regSignals(void) {
     struct sigaction act;
 
     // Do not process other signals before current processing is finished
-    sigfillset(&act.sa_mask);
+    sigemptyset(&act.sa_mask);
     act.sa_handler = SigDef::signalHandler;
 
     if( sigaction(SigDef::SIG_FOUND_HUMAN, &act, NULL) < 0

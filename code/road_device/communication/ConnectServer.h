@@ -18,7 +18,7 @@ private :
     enum {
         MESSAGE_SIZE = 100
     };
-    int sd;
+    int sd; // socket descriptor
     struct sockaddr_in sin;
 
 public:

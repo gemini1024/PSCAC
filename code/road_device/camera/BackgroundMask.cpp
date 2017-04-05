@@ -17,6 +17,9 @@ BackgroundMask::~BackgroundMask() {
 }
 
 
+
+// Identify moving areas for a period of time.
+// The area without motion is erased.
 UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
     std::cout << "Recognizing the background ... " << std::endl;
     recognizeBackgournd(vc);
@@ -24,17 +27,15 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 
     std::cout << "Creating Mask ... " << std::endl;
     accumulateMasks(vc);
-    std::cout << "Mask creation Complete!" << std::endl;
-
-    std::cout << "Reducing noise from the mask ... " << std::endl;
+    // Closing operation ( to reduce noise )
     dilate(accumulatedMask, accumulatedMask, UMat());
     erode(accumulatedMask, accumulatedMask, UMat());
-    std::cout << "Reducing noise Complete!" << std::endl;
-
-    imshow( CamDef::mask, accumulatedMask );  // show background mask
+    std::cout << "Mask creation Complete!" << std::endl;
 
     return accumulatedMask;
 }
+
+
 
 // Recognize a moving object and wait until a mask using GMG method is created
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
@@ -58,6 +59,8 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
 
     img.release();
 }
+
+
 
 // Determine and accumulate areas with moving objects
 void BackgroundMask::accumulateMasks(VideoCapture& vc) {
@@ -98,6 +101,8 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 }
 
 
+
+// Check the current setting of BackgroundMask
 void BackgroundMask::printProperties() {
     std::cout << "InitializationFrames : " << pMask->getNumFrames()
     << "\nLearningRate : " << pMask->getDefaultLearningRate()
@@ -107,6 +112,8 @@ void BackgroundMask::printProperties() {
     << std::endl;
 }
 
+
+// Set RecognizeNumFrames of BackgroundSubtractorGMG.
 void BackgroundMask::setRecognizeNumFrames(int num) {
     pMask->setNumFrames(num);
 }
@@ -116,11 +123,12 @@ void BackgroundMask::setNoiseRemovalNumFrames(int num) {
     noiseRemovalNumFrames = num;
 }
 
-
+// Set the number of frames needed to create the mask.
 void BackgroundMask::setAccumulateNumFrames(int num) {
     accumulateNumFrames = num;
 }
 
+// Set LearningRate of BackgroundSubtractorGMG.
 void BackgroundMask::setLearningRate(double rate) {
     pMask->setDefaultLearningRate(rate);
 }
