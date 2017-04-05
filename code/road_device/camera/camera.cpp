@@ -90,7 +90,7 @@ int takeRoad(void)
     BackgroundMask bgMask;
     bgMask.setRecognizeNumFrames(24);  // Default : 120 ( BackgroundSubtractorGMG's default value )
     bgMask.setNoiseRemovalNumFrames( vc.get(CV_CAP_PROP_FPS) ); // Default : 12
-    bgMask.setAccumulateNumFrames(600); // Default : 600
+    bgMask.setAccumulateNumFrames(120); // Default : 600
     bgMask.setLearningRate(0.025); // Default : 0.025
     bgMask.printProperties();
     UMat mask = bgMask.createBackgroundMask(vc);
@@ -107,24 +107,26 @@ int takeRoad(void)
 
 
     std::cout << "Start Detection ..." << std::endl;
+    bool playVideo = true; char pressedKey;
     while (1) {
-        // Put the captured image in img
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            break;
+        if(playVideo) {
+            // Put the captured image in img
+            vc >> img;
+            if (img.empty())  {
+                std::cerr << "ERROR : Unable to load frame" << std::endl;
+                break;
+            }
+
+
+            // Exclude areas excluding road areas in the original image.
+            bgMask.locateForeground(img, fgimg);
+
+            // Detect pedestrians and vehicle
+            std::thread t1(detectObjects, std::ref(fgimg), std::ref(pe_Detector), SigDef::SIG_FOUND_HUMAN);
+            std::thread t2(detectObjects, std::ref(fgimg), std::ref(car_Detector), SigDef::SIG_FOUND_CAR);
+            t1.join();
+            t2.join();
         }
-
-
-        // Exclude areas excluding road areas in the original image.
-        bgMask.locateForeground(img, fgimg);
-
-        // Detect pedestrians and vehicle
-        std::thread t1(detectObjects, std::ref(fgimg), std::ref(pe_Detector), SigDef::SIG_FOUND_HUMAN);
-        std::thread t2(detectObjects, std::ref(fgimg), std::ref(car_Detector), SigDef::SIG_FOUND_CAR);
-        t1.join();
-        t2.join();
-
 
 
         // Print out the images in the window.
@@ -132,7 +134,12 @@ int takeRoad(void)
         imshow( "roadImg", car_Detector.getRoadImg() );  // show background mask
         imshow( CamDef::resultVideo, fgimg );  // show image
 
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {  // ESC -> break
+
+        // press SPACE BAR -> pause video
+        // press ESC -> close video
+        if ( ( pressedKey = waitKey( CamDef::DELAY ) ) == CamDef::PAUSE ) // SPACE BAR
+            playVideo = !playVideo;
+        else if(  pressedKey == CamDef::CLOSE ) { // ESC
             std::cout << "Disconnecting from camera and returning resources ..." << std::endl;
             break;
         }

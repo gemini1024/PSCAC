@@ -9,8 +9,9 @@
 namespace CamDef {
 
     enum {
-        DELAY = 10,
-        ESC = 27
+        DELAY = 10, // 10 ms
+        CLOSE = 27, // ESC
+        PAUSE = 32 // SPACE BAR
     };
 
     // Video's source

@@ -51,7 +51,7 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
         pMask->apply(img, bgMask);
         imshow( CamDef::originalVideo, img );  // show original image
 
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
+        if( waitKey( CamDef::DELAY ) == CamDef::CLOSE ) { // ESC
             std::cout << "Closing the program ..." << std::endl;
             exit(0);
         }
@@ -86,7 +86,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
             imshow( CamDef::originalVideo, img );  //  show original image
             imshow( CamDef::mask, accumulatedMask );  // show background mask
 
-            if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
+            if( waitKey( CamDef::DELAY ) == CamDef::CLOSE ) { // ESC
                 std::cout << "Closing the program ..." << std::endl;
                 exit(0);
             }
