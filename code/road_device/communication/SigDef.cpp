@@ -19,6 +19,7 @@ void regSignals(void) {
     // Do not process other signals before current processing is finished
     sigemptyset(&act.sa_mask);
     act.sa_handler = SigDef::signalHandler;
+    act.sa_flags = 0;
 
     if( sigaction(SigDef::SIG_FOUND_HUMAN, &act, NULL) < 0
         || sigaction(SigDef::SIG_FOUND_CAR, &act, NULL) < 0) {
@@ -46,17 +47,18 @@ void SigDef::signalHandler(int signo) {
 
 
 void SigDef::foundPedestrians(void) {
-    // TODO : send data to Server
     std::cout<< "Found  Pedestrians" << std::endl;
 
     // TODO : Apply our server address and port number and Need to define the communication method.
     // static ConnectServer connServ("127.0.0.1", 5001);
-    // static ConnectServer connServ("211.253.29.38", 5001);
-    // connServ.sendMessage("Found  Pedestrians");
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage("Found  Pedestrians");
 }
 
 void SigDef::foundVehicles(void) {
-    // TODO : send data to Pedestrians
     std::cout<< "Found  Vehicles" << std::endl;
+
+    // // static ConnectServer connServ("211.253.29.38", 5001);
+    // connServ.sendMessage("Found  Vehicles");
 }
 
