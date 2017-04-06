@@ -28,7 +28,8 @@ public :
     BackgroundMask();
     ~BackgroundMask();
     UMat createBackgroundMask(VideoCapture& vc);
-    void printProperties();
+    UMat roadBackgroundMask(void);
+    void printProperties(void);
     void setRecognizeNumFrames(int num);
     void setNoiseRemovalNumFrames(int num);
     void setAccumulateNumFrames(int num);

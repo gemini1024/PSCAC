@@ -36,6 +36,24 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 }
 
 
+// Road the mask previously created by the call to createBackgroundMask()
+UMat BackgroundMask::roadBackgroundMask(void) {
+    std::cout << "Road Learned BackgroundMask ... " << std::endl;
+
+    Mat maskImg = imread( CamDef::learnedMask, IMREAD_GRAYSCALE  );
+    if ( maskImg.empty() ) {
+        std::cerr << "ERROR : Unable to load learnedMask" << std::endl;
+        exit(0);
+    }
+    maskImg.copyTo(accumulatedMask);
+    maskImg.release();
+
+    std::cout << "Learned BackgroundMask road Complete! " << std::endl;
+
+    return accumulatedMask;
+}
+
+
 
 // Recognize a moving object and wait until a mask using GMG method is created
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
@@ -106,6 +124,8 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 void BackgroundMask::printProperties() {
     std::cout << "InitializationFrames : " << pMask->getNumFrames()
     << "\nLearningRate : " << pMask->getDefaultLearningRate()
+    << "\nNoiseRemovalNumFrames : " << noiseRemovalNumFrames
+    << "\nAccumulateNumFrames : " << accumulateNumFrames
     << "\nQuantizationLevels : " << pMask->getQuantizationLevels ()
     << "\nSmoothingRadius : " << pMask->getSmoothingRadius()
     << "\nUpdateBackgroundModel : " << pMask->getUpdateBackgroundModel()

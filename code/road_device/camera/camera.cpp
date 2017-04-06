@@ -93,7 +93,10 @@ int takeRoad(void)
     bgMask.setAccumulateNumFrames(120); // Default : 600
     bgMask.setLearningRate(0.025); // Default : 0.025
     bgMask.printProperties();
-    UMat mask = bgMask.createBackgroundMask(vc);
+
+    // Select the source of the mask.
+    // UMat mask = bgMask.createBackgroundMask(vc);
+    UMat mask = bgMask.roadBackgroundMask();
     imshow( CamDef::mask, mask );  // show background mask
 
 
