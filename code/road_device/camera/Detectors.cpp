@@ -40,7 +40,6 @@ PedestriansDetector::~PedestriansDetector() {
 
 void PedestriansDetector::detect(UMat& img) {
     // Find Pedestrians
-    // detector.detectMultiScale(img, found, 1.1, 2, 0, Size(0,0), Size(160,300));
     detector.detectMultiScale(img, found, 1.04, 4, 1, Size(30,80), Size(80,200));
 
     // Draw Green Rectangle on Pedestrians
@@ -64,13 +63,12 @@ VehiclesDetector::~VehiclesDetector() {
 
 void VehiclesDetector::detect(UMat& img) {
     // Find Vehicles
-    // detector.detectMultiScale(img, found, 1.1, 2, 0, Size(30,30), Size(480,480));
-    detector.detectMultiScale(img, found, 1.1, 5, 1, Size(20,20), Size(600,600));
+    detector.detectMultiScale(img, found, 1.1, 8, 1, Size(20,20), Size(600,600));
 
     // Draw Red Rectangle on Vehicles
     for ( auto const& r : found ) {
         rectangle(img, r.tl(), r.br(), Scalar(0,0,255), 3);
-        rectangle(roadImg, Point(r.tl().x, r.br().y+10), r.br(), Scalar(0,0,255), -1);
+        rectangle(roadImg, Point(r.tl().x, r.br().y+5), r.br(), Scalar(0,0,255), -1);
     }
 }
 

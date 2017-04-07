@@ -90,13 +90,13 @@ int takeRoad(void)
     BackgroundMask bgMask;
     bgMask.setRecognizeNumFrames(24);  // Default : 120 ( BackgroundSubtractorGMG's default value )
     bgMask.setNoiseRemovalNumFrames( vc.get(CV_CAP_PROP_FPS) ); // Default : 12
-    bgMask.setAccumulateNumFrames(120); // Default : 600
+    bgMask.setAccumulateNumFrames(300); // Default : 600
     bgMask.setLearningRate(0.025); // Default : 0.025
     bgMask.printProperties();
 
     // Select the source of the mask.
-    // UMat mask = bgMask.createBackgroundMask(vc);
-    UMat mask = bgMask.roadBackgroundMask();
+    UMat mask = bgMask.createBackgroundMask(vc);
+    // UMat mask = bgMask.roadBackgroundMask();
     imshow( CamDef::mask, mask );  // show background mask
 
 
@@ -112,6 +112,7 @@ int takeRoad(void)
     std::cout << "Start Detection ..." << std::endl;
     bool playVideo = true; char pressedKey;
     while (1) {
+
         if(playVideo) {
             // Put the captured image in img
             vc >> img;
@@ -119,6 +120,8 @@ int takeRoad(void)
                 std::cerr << "ERROR : Unable to load frame" << std::endl;
                 break;
             }
+            // show original image
+            imshow( CamDef::originalVideo, img );
 
 
             // Exclude areas excluding road areas in the original image.
@@ -129,13 +132,12 @@ int takeRoad(void)
             std::thread t2(detectObjects, std::ref(fgimg), std::ref(car_Detector), SigDef::SIG_FOUND_CAR);
             t1.join();
             t2.join();
+
+
+            // show image processing result
+            imshow( "roadImg", car_Detector.getRoadImg() );
+            imshow( CamDef::resultVideo, fgimg );
         }
-
-
-        // Print out the images in the window.
-        imshow( CamDef::originalVideo, img );  // show original image
-        imshow( "roadImg", car_Detector.getRoadImg() );  // show background mask
-        imshow( CamDef::resultVideo, fgimg );  // show image
 
 
         // press SPACE BAR -> pause video

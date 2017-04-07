@@ -157,6 +157,13 @@ void BackgroundMask::setLearningRate(double rate) {
 // Only copy the foreground using the completed mask
 void BackgroundMask::locateForeground(UMat& src, UMat& dst) {
     assert(!accumulatedMask.empty());
+
+    // source image equalization
+    cvtColor(src, dst, CV_BGR2GRAY);
+    equalizeHist(dst, dst);
+    cvtColor(dst, src, CV_GRAY2BGR);
     dst.release();
+
+    // mask processing
     src.copyTo(dst, accumulatedMask);
 }

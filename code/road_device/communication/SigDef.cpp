@@ -50,15 +50,15 @@ void SigDef::foundPedestrians(void) {
     std::cout<< "Found  Pedestrians" << std::endl;
 
     // TODO : Apply our server address and port number and Need to define the communication method.
-    static ConnectServer connServ("127.0.0.1", 5001);
+    // static ConnectServer connServ("127.0.0.1", 5001);
     // static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("Found  Pedestrians");
+    // connServ.sendMessage("2,warrning");
 }
 
 void SigDef::foundVehicles(void) {
     std::cout<< "Found  Vehicles" << std::endl;
 
-    // // static ConnectServer connServ("211.253.29.38", 5001);
+    // static ConnectServer connServ("211.253.29.38", 5001);
     // connServ.sendMessage("Found  Vehicles");
 }
 
