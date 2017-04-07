@@ -43,14 +43,11 @@ public:
 
 class VehiclesDetector : public Detector {
 private:
-    UMat roadImg;
 
 public:
     VehiclesDetector();
     virtual ~VehiclesDetector();
     virtual void detect(UMat& img);
-    void initRoadImg(UMat& mask);
-    const UMat& getRoadImg(void);
 };
 
 #endif

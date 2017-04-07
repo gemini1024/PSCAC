@@ -21,6 +21,7 @@ namespace CamDef {
     const std::string learnedMask("camera/learnedMask.png");
     const std::string originalVideo("origin");
     const std::string mask("mask");
+    const std::string roadImg("roadImg");
     const std::string resultVideo("detect");
 }
 

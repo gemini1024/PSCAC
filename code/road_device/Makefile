@@ -3,7 +3,7 @@
 
 CC = g++
 DIRS = camera communication
-OBJS = main.o camera.o BackgroundMask.o Detectors.o SigDef.o ConnectServer.o
+OBJS = main.o camera.o BackgroundMask.o Detectors.o Situation.o SigDef.o ConnectServer.o
 TARGET = detect
 
 .SUFFIXES : .cpp .o

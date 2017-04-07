@@ -19,48 +19,22 @@
 
 #include "BackgroundMask.h"
 #include "Detectors.h"
+#include "Situation.h"
 #include "CamDef.h"
-
-#include "../communication/SigDef.h"
 
 using namespace cv; // openCV
 
 
 
 
-
 // Detect objects by each detectors.
+// calls detect () overridden on each detector.
+// param - detector : This detector has learned the characteristics of the objects to be detected.
 // param - fgimg :  (Forground images) Detection of objects in this image is detected, and the detection results are also shown in this image.
 // ( The pedestrian is indicated by the green color, and the vehicle is red. )
-// param - detector : This detector has learned the characteristics of the objects to be detected.
-// param - signo : Types of signals that generate signals for detection
-void detectObjects(UMat& fgimg, Detector& detector, int signo) {
-    // calls detect () overridden on each detector.
+void detectObjects(Detector& detector, UMat& fgimg) {
     detector.detect(fgimg);
-
-    // Behavior when an object is found in the current frame
-    if( detector.isFound() ) {
-       sendSignalToParentProcess(signo);
-
-        std::string objtype;
-        if ( signo == SigDef::SIG_FOUND_HUMAN ) {
-            objtype = "Human";
-        } else {
-            objtype = "Car";
-        }
-
-        // TODO : Store the coordinates for a period of time and predict the risk situation.
-        // Outputs the coordinates of the found objects in frame.
-        const std::vector<Rect>& foundObj = detector.getFoundObjects();
-        for( auto const& r : foundObj ) {
-            std::cout << objtype << " : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
-            << r.br().x << "," << r.br().y << "), md = ("
-            << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
-        }
-    }
 }
-
-
 
 
 
@@ -105,8 +79,7 @@ int takeRoad(void)
     UMat img, fgimg; // using OpenCL ( UMat )
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
-
-    car_Detector.initRoadImg(mask);
+    Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH) );
 
 
     std::cout << "Start Detection ..." << std::endl;
@@ -128,14 +101,20 @@ int takeRoad(void)
             bgMask.locateForeground(img, fgimg);
 
             // Detect pedestrians and vehicle
-            std::thread t1(detectObjects, std::ref(fgimg), std::ref(pe_Detector), SigDef::SIG_FOUND_HUMAN);
-            std::thread t2(detectObjects, std::ref(fgimg), std::ref(car_Detector), SigDef::SIG_FOUND_CAR);
+            // Detect pedestrians and vehicle
+            std::thread t1(detectObjects, std::ref(pe_Detector), std::ref(fgimg));
+            std::thread t2(detectObjects, std::ref(car_Detector), std::ref(fgimg));
             t1.join();
             t2.join();
 
 
+            // Judge the situation of the road
+            situation.updateRoadImg( car_Detector.getFoundObjects() );
+            situation.sendPredictedSituation( pe_Detector.getFoundObjects() );
+
+
             // show image processing result
-            imshow( "roadImg", car_Detector.getRoadImg() );
+            imshow( CamDef::roadImg, situation.getRoadImg() );
             imshow( CamDef::resultVideo, fgimg );
         }
 
