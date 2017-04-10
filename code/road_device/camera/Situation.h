@@ -6,7 +6,6 @@
 
 
 #include <opencv2/opencv.hpp>
-#include "../communication/SigDef.h"
 
 using namespace cv;
 

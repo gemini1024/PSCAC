@@ -69,8 +69,8 @@ int takeRoad(void)
     bgMask.printProperties();
 
     // Select the source of the mask.
-    UMat mask = bgMask.createBackgroundMask(vc);
-    // UMat mask = bgMask.roadBackgroundMask();
+    // UMat mask = bgMask.createBackgroundMask(vc);
+    UMat mask = bgMask.loadBackgroundMask();
     imshow( CamDef::mask, mask );  // show background mask
 
 
@@ -111,10 +111,10 @@ int takeRoad(void)
             // Judge the situation of the road
             situation.updateRoadImg( car_Detector.getFoundObjects() );
             situation.sendPredictedSituation( pe_Detector.getFoundObjects() );
+            imshow( CamDef::roadImg, situation.getRoadImg() );
 
 
             // show image processing result
-            imshow( CamDef::roadImg, situation.getRoadImg() );
             imshow( CamDef::resultVideo, fgimg );
         }
 

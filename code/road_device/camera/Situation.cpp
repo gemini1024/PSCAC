@@ -2,6 +2,7 @@
 // Predict harzard situation
 
 #include "Situation.h"
+#include "../communication/SigDef.h"
 
 
 // Get the size of the frame to initialize roadImg
@@ -10,6 +11,7 @@ Situation::Situation(int imgRows, int imgCols) {
 }
 
 Situation::~Situation() {
+    roadImg.release();
 }
 
 
@@ -47,15 +49,19 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
        sendSignalToParentProcess( SigDef::SIG_FOUND_HUMAN );
 
        Mat roadMat = roadImg.getMat( ACCESS_READ );
-        for( auto const& r : foundPedestrians ) {
+       for( auto const& r : foundPedestrians ) {
             std::cout << "Human : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
             << r.br().x << "," << r.br().y << "), md = ("
             << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
 
 
             // Warns you if one of the top and bottom coordinates in the center of a person object has red coordinates
-            for( int i=-2; i <= 2; i++) {
+            int hitCount = 0;
+            for( int i=-5; i <= 5; i++) {
                 if( roadMat.at<Vec3b>(Point( (r.br()-r.tl()).x/2 + r.tl().x, (r.br()-r.tl()).y/2 + r.tl().y + i ) )[2] == 255  ) {
+                    hitCount++;
+                }
+                if ( hitCount > 5 ) {
                     std::cout << " [[ Warning !! ]] Human in roadImg " << std:: endl;
                     break;
                 }

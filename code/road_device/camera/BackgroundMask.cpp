@@ -37,8 +37,8 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 
 
 // Road the mask previously created by the call to createBackgroundMask()
-UMat BackgroundMask::roadBackgroundMask(void) {
-    std::cout << "Road Learned BackgroundMask ... " << std::endl;
+UMat BackgroundMask::loadBackgroundMask(void) {
+    std::cout << "Load Learned BackgroundMask ... " << std::endl;
 
     Mat maskImg = imread( CamDef::learnedMask, IMREAD_GRAYSCALE  );
     if ( maskImg.empty() ) {
