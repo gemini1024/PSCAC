@@ -21,8 +21,8 @@ void regSignals(void) {
     act.sa_handler = SigDef::signalHandler;
     act.sa_flags = 0;
 
-    if( sigaction(SigDef::SIG_FOUND_HUMAN, &act, NULL) < 0
-        || sigaction(SigDef::SIG_FOUND_CAR, &act, NULL) < 0) {
+    if( sigaction(SigDef::SIG_WARNING, &act, NULL) < 0
+        || sigaction(SigDef::SIG_STOP, &act, NULL) < 0) {
         perror("sigaction");
         exit(1);
     }
@@ -34,11 +34,11 @@ void regSignals(void) {
 // Internal calling functions
 void SigDef::signalHandler(int signo) {
     switch(signo) {
-        case SIG_FOUND_HUMAN :
-            foundPedestrians();
+        case SIG_WARNING :
+            sendWarning();
             break;
-        case SIG_FOUND_CAR :
-            foundVehicles();
+        case SIG_STOP :
+            sendStop();
             break;
         default :
             break;
@@ -46,8 +46,8 @@ void SigDef::signalHandler(int signo) {
 }
 
 
-void SigDef::foundPedestrians(void) {
-    std::cout<< "Found  Pedestrians" << std::endl;
+void SigDef::sendWarning(void) {
+    std::cout<< "Warning Situation" << std::endl;
 
     // TODO : Apply our server address and port number and Need to define the communication method.
     // static ConnectServer connServ("127.0.0.1", 5001);
@@ -55,8 +55,8 @@ void SigDef::foundPedestrians(void) {
     // connServ.sendMessage("2,warrning");
 }
 
-void SigDef::foundVehicles(void) {
-    std::cout<< "Found  Vehicles" << std::endl;
+void SigDef::sendStop(void) {
+    std::cout<< "Stop Situation" << std::endl;
 
     // static ConnectServer connServ("211.253.29.38", 5001);
     // connServ.sendMessage("Found  Vehicles");

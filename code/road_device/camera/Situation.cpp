@@ -22,6 +22,7 @@ Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCn
 
 Situation::~Situation() {
     roadImg.release();
+    signImg.release();
 }
 
 
@@ -40,8 +41,6 @@ void Situation::updateRoadImg(const std::vector<Rect>& foundVehicles) {
 
     // TODO : Remove when the situation is judged to some extent.
     if ( !foundVehicles.empty() ) {
-       sendSignalToParentProcess( SigDef::SIG_FOUND_CAR );
-
         for( auto const& r : foundVehicles ) {
             std::cout << "Car : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
             << r.br().x << "," << r.br().y << "), md = ("
@@ -56,8 +55,6 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
 
     // TODO : Store the coordinates for a period of time and predict the risk situation.
     if ( !foundPedestrians.empty() ) {
-       sendSignalToParentProcess( SigDef::SIG_FOUND_HUMAN );
-
        Mat roadMat = roadImg.getMat( ACCESS_READ );
        for( auto const& r : foundPedestrians ) {
             std::cout << "Human : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
@@ -94,11 +91,13 @@ void Situation::setSituation(int situation) {
             safeCnt = 0;
             break;
         case WARNING :
+            sendSignalToParentProcess( SigDef::SIG_WARNING );
             std::cout << " [[ Warning !! ]] Human are approaching" << std:: endl;
             signImg = imread( SignsDef::warning );
             safeCnt = delay;
             break;
         case STOP :
+            sendSignalToParentProcess( SigDef::SIG_STOP );
             std::cout << " [[ STOP !! ]] Human in roadImg " << std:: endl;
             signImg = imread( SignsDef::stop );
             safeCnt = delay;

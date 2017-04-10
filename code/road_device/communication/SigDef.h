@@ -12,12 +12,12 @@ void regSignals(void);
 
 namespace SigDef {
     enum {
-        SIG_FOUND_HUMAN = SIGUSR1,
-        SIG_FOUND_CAR = SIGUSR2
+        SIG_WARNING = SIGUSR1,
+        SIG_STOP = SIGUSR2
     };
     void signalHandler(int signo);
-    void foundPedestrians(void);
-    void foundVehicles(void);
+    void sendWarning(void);
+    void sendStop(void);
 }
 
 
