@@ -2,12 +2,22 @@
 // Predict harzard situation
 
 #include "Situation.h"
+#include "CamDef.h"
 #include "../communication/SigDef.h"
+#include "../signs/SignsDef.h"
 
 
-// Get the size of the frame to initialize roadImg
-Situation::Situation(int imgRows, int imgCols) {
+
+// param - imgRows, imgCols : Get the size of the frame to initialize roadImg
+// param - delay : Delay time to switch from a caution situation to a safety situation
+Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCnt(0) {
     roadImg = UMat::zeros(imgRows, imgCols, CV_8UC3);
+    signImg = imread( SignsDef::safety );
+    if( signImg.empty() ) {
+        std::cerr << "ERROR : Could not load signpost image" << std::endl;
+        exit(1);
+    }
+    imshow( CamDef::sign, signImg );
 }
 
 Situation::~Situation() {
@@ -57,16 +67,48 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
 
             // Warns you if one of the top and bottom coordinates in the center of a person object has red coordinates
             int hitCount = 0;
-            for( int i=-5; i <= 5; i++) {
-                if( roadMat.at<Vec3b>(Point( (r.br()-r.tl()).x/2 + r.tl().x, (r.br()-r.tl()).y/2 + r.tl().y + i ) )[2] == 255  ) {
+            for( int i=0; i <= 5; i++) {
+                if( roadMat.at<Vec3b>(Point( (r.br()-r.tl()).x/2 + r.tl().x, (r.br()-r.tl()).y/4*3 + r.tl().y + i ) )[2] == 255  ) {
                     hitCount++;
                 }
-                if ( hitCount > 5 ) {
-                    std::cout << " [[ Warning !! ]] Human in roadImg " << std:: endl;
+                if ( hitCount > 3 ) {
+                    setSituation(STOP);
                     break;
                 }
             }
         }
         roadMat.release();
     }
+    // After a certain period of time, switch to safety
+    if( --safeCnt < 0 )
+        setSituation(SAFETY);
+}
+
+
+// Set the current status and send it to LCD
+void Situation::setSituation(int situation) {
+    switch(situation) {
+        case SAFETY :
+            std::cout << " [[ Safety ]]" << std:: endl;
+            signImg = imread( SignsDef::safety );
+            safeCnt = 0;
+            break;
+        case WARNING :
+            std::cout << " [[ Warning !! ]] Human are approaching" << std:: endl;
+            signImg = imread( SignsDef::warning );
+            safeCnt = delay;
+            break;
+        case STOP :
+            std::cout << " [[ STOP !! ]] Human in roadImg " << std:: endl;
+            signImg = imread( SignsDef::stop );
+            safeCnt = delay;
+            break;
+        default :
+            break;
+    }
+    if( signImg.empty() ) {
+        std::cerr << "ERROR : Could not load signpost image" << std::endl;
+        exit(1);
+    }
+    imshow( CamDef::sign, signImg );
 }

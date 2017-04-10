@@ -22,6 +22,7 @@ namespace CamDef {
     const std::string originalVideo("origin");
     const std::string mask("mask");
     const std::string roadImg("roadImg");
+    const std::string sign("SIGN");
     const std::string resultVideo("detect");
 }
 
