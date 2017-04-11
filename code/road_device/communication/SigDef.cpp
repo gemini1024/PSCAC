@@ -47,18 +47,12 @@ void SigDef::signalHandler(int signo) {
 
 
 void SigDef::sendWarning(void) {
-    std::cout<< "Warning Situation" << std::endl;
-
-    // TODO : Apply our server address and port number and Need to define the communication method.
-    // static ConnectServer connServ("127.0.0.1", 5001);
-    // static ConnectServer connServ("211.253.29.38", 5001);
-    // connServ.sendMessage("2,warrning");
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage("2,warrning");
 }
 
 void SigDef::sendStop(void) {
-    std::cout<< "Stop Situation" << std::endl;
-
-    // static ConnectServer connServ("211.253.29.38", 5001);
-    // connServ.sendMessage("Found  Vehicles");
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage("2,stop");
 }
 
