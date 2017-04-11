@@ -21,7 +21,7 @@ private :
     Mat safetyImg;
     Mat warningImg;
     Mat stopImg;
-    int delay;
+    const int delay;
     int safeCnt;
 
 private :

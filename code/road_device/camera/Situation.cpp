@@ -75,6 +75,9 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
                 if ( hitCount > 3 ) {
                     setSituation(STOP);
                     break;
+                } else if( safeCnt < delay/2 && (roadMat.at<Vec3b>( r.br() )[2] == 255
+                    || roadMat.at<Vec3b>(Point( r.tl().x, r.br().y ))[2] == 255 ) ) {
+                    setSituation(WARNING);
                 }
             }
         }
@@ -98,7 +101,7 @@ void Situation::setSituation(int situation) {
             sendSignalToParentProcess( SigDef::SIG_WARNING );
             std::cout << " [[ Warning !! ]] Human are approaching" << std:: endl;
             imshow( CamDef::sign, warningImg );
-            safeCnt = delay;
+            safeCnt = delay/2;
             break;
         case STOP :
             sendSignalToParentProcess( SigDef::SIG_STOP );

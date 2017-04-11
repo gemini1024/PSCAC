@@ -69,8 +69,8 @@ int takeRoad(void)
     bgMask.printProperties();
 
     // Select the source of the mask.
-    // UMat mask = bgMask.createBackgroundMask(vc);
-    UMat mask = bgMask.loadBackgroundMask();
+    UMat mask = bgMask.createBackgroundMask(vc);
+    // UMat mask = bgMask.loadBackgroundMask();
     imshow( CamDef::mask, mask );  // show background mask
 
 
@@ -79,7 +79,7 @@ int takeRoad(void)
     UMat img, fgimg; // using OpenCL ( UMat )
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
-    Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS) );
+    Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS)*2.5 );
 
 
     std::cout << "Start Detection ..." << std::endl;
