@@ -154,11 +154,13 @@ public class PSCACBean {
 		ResultSet rs = pstmt.executeQuery();
 
 		// 데이터가 하나만 있으므로 rs.next()를 한번만 실행 한다. rs.next();
+		if(rs.next()){
 		vo.setId(rs.getString("id"));
-		vo.setLatitude("latitude");
-		vo.setLongtitud("longtitud");
+		vo.setLatitude(rs.getString("latitude"));
+		vo.setLongtitud(rs.getString("longtitud"));
 		//vo.setGps(rs.getString("gps"));
 		vo.setStatus(rs.getString("status"));
+		}
 
 		rs.close();
 	}catch(SQLException e)

@@ -33,6 +33,7 @@ public class ReceiveServer {
 				// 전송받은 데이터를 String 객체에 지정하고 출력
 				String msg = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
+				System.out.println("Receiving : " + msg);
 				/*
 				 * //odroid 첫 부팅시 gps 수신 if(msg.equals("SendGps")){
 				 * pgps.receiveGPS(gps); System.out.println(gps); }
@@ -51,10 +52,7 @@ public class ReceiveServer {
 				pgps.receiveAlarm(vo);
 				
 				System.out.println("Alarm Text save in pscacvo");
-				// }
-				System.out.println("Receiving : " + msg);
-				if (msg.equals("quit"))
-					break;
+								
 
 			}
 		} catch (Exception e) {

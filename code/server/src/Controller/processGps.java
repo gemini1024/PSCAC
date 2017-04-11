@@ -24,14 +24,27 @@ public class processGps {
 		FCMVo fcmvo = new FCMVo();
 		SendPushServer send = new SendPushServer();
 		
-		String gps;
+/*		String gps;
 		gps = database.getDBFId(vo.getId()).getGps();
-		vo.setGps(gps);
+		vo.setGps(gps);*/
+		
+		
+		
+		String latitude, longtitud;
+		
+		latitude = database.getDBFId(vo.getId()).getLatitude();
+		longtitud = database.getDBFId(vo.getId()).getLongtitud();
 		
 		//vo.setGps(database.getDBFId(vo.getId()).getGps());
+		//fcmvo.setMsg("\"content\":" + vo.getGps());
+		//fcmvo.setTitle("Alarm");
+		System.out.println(latitude);
 		
-		fcmvo.setMsg("\"content\":" + vo.getGps());
-		fcmvo.setTitle("Alarm");
+		fcmvo.setLatitude(latitude);
+		fcmvo.setLongitude(longtitud);
+		
+		fcmvo.setAlarm("default");
+		fcmvo.setTitle("alert");
 		
 		send.pushFCMNotification(fcmvo);
 		
