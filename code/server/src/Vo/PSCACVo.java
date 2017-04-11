@@ -4,7 +4,24 @@ public class PSCACVo {
 
 	private String Id;
 	private String Gps;
+	private String Longtitud;
+	private String Latitude;
 	private String Status;
+	
+	
+	public String getLongtitud() {
+		return Longtitud;
+	}
+	public void setLongtitud(String longtitud) {
+		Longtitud = longtitud;
+	}
+	public String getLatitude() {
+		return Latitude;
+	}
+	public void setLatitude(String latitude) {
+		Latitude = latitude;
+	}
+
 	
 	
 	public String getId() {

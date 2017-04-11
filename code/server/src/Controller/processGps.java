@@ -36,4 +36,15 @@ public class processGps {
 		send.pushFCMNotification(fcmvo);
 		
 	}
+	public static void main(String[] args) {
+		PSCACVo vo = new PSCACVo();
+		processGps pg = new processGps(); // 생성자 호출
+		try {
+			pg.receiveAlarm(vo);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 }

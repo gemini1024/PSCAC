@@ -17,14 +17,14 @@ public class PSCACBean {
 
 	/* MySQL 연결정보 */
 	String jdbc_driver = "com.mysql.jdbc.Driver";
-	String jdbc_url = "jdbc:mysql://127.0.0.1:3306/jspdb";
+	String jdbc_url = "jdbc:mysql://211.253.29.38:3306/odroid";
 
 	// DB연결 메서드
 	void connect() {
 		try {
 			Class.forName(jdbc_driver);
 
-			conn = DriverManager.getConnection(jdbc_url, "odroid", "odroid");
+			conn = DriverManager.getConnection(jdbc_url, "root", "odroidroot!");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -155,7 +155,9 @@ public class PSCACBean {
 
 		// 데이터가 하나만 있으므로 rs.next()를 한번만 실행 한다. rs.next();
 		vo.setId(rs.getString("id"));
-		vo.setGps(rs.getString("gps"));
+		vo.setLatitude("latitude");
+		vo.setLongtitud("longtitud");
+		//vo.setGps(rs.getString("gps"));
 		vo.setStatus(rs.getString("status"));
 
 		rs.close();
