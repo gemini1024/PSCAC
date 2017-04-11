@@ -12,17 +12,21 @@
 // param - delay : Delay time to switch from a caution situation to a safety situation
 Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCnt(0) {
     roadImg = UMat::zeros(imgRows, imgCols, CV_8UC3);
-    signImg = imread( SignsDef::safety );
-    if( signImg.empty() ) {
+    safetyImg = imread( SignsDef::safety );
+    warningImg = imread( SignsDef::warning );
+    stopImg = imread( SignsDef::stop );
+    if( safetyImg.empty() || warningImg.empty() || stopImg.empty() ) {
         std::cerr << "ERROR : Could not load signpost image" << std::endl;
         exit(1);
     }
-    imshow( CamDef::sign, signImg );
+    imshow( CamDef::sign, safetyImg );
 }
 
 Situation::~Situation() {
+    stopImg.release();
+    warningImg.release();
+    safetyImg.release();
     roadImg.release();
-    signImg.release();
 }
 
 
@@ -36,7 +40,7 @@ const UMat& Situation::getRoadImg(void) {
 void Situation::updateRoadImg(const std::vector<Rect>& foundVehicles) {
     // Draw Red line under the vehicles
     for ( auto const& r : foundVehicles ) {
-        rectangle(roadImg, Point(r.tl().x, r.br().y+5), r.br(), Scalar(0,0,255), -1);
+        rectangle(roadImg, Point(r.tl().x, r.br().y-3), r.br(), Scalar(0,0,255), -1);
     }
 
     // TODO : Remove when the situation is judged to some extent.
@@ -87,27 +91,22 @@ void Situation::setSituation(int situation) {
     switch(situation) {
         case SAFETY :
             std::cout << " [[ Safety ]]" << std:: endl;
-            signImg = imread( SignsDef::safety );
+            imshow( CamDef::sign, safetyImg );
             safeCnt = 0;
             break;
         case WARNING :
             sendSignalToParentProcess( SigDef::SIG_WARNING );
             std::cout << " [[ Warning !! ]] Human are approaching" << std:: endl;
-            signImg = imread( SignsDef::warning );
+            imshow( CamDef::sign, warningImg );
             safeCnt = delay;
             break;
         case STOP :
             sendSignalToParentProcess( SigDef::SIG_STOP );
             std::cout << " [[ STOP !! ]] Human in roadImg " << std:: endl;
-            signImg = imread( SignsDef::stop );
+            imshow( CamDef::sign, stopImg );
             safeCnt = delay;
             break;
         default :
             break;
     }
-    if( signImg.empty() ) {
-        std::cerr << "ERROR : Could not load signpost image" << std::endl;
-        exit(1);
-    }
-    imshow( CamDef::sign, signImg );
 }

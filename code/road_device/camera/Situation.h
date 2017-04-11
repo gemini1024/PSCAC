@@ -18,7 +18,9 @@ private :
     	STOP
     };
     UMat roadImg;
-    Mat signImg;
+    Mat safetyImg;
+    Mat warningImg;
+    Mat stopImg;
     int delay;
     int safeCnt;
 
