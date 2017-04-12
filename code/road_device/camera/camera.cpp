@@ -80,6 +80,7 @@ int takeRoad(void)
     PedestriansDetector pe_Detector;
     VehiclesDetector car_Detector;
     Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS)*2.5 );
+    situation.loadRoadImg();
 
 
     std::cout << "Start Detection ..." << std::endl;
@@ -109,7 +110,7 @@ int takeRoad(void)
 
 
             // Judge the situation of the road
-            situation.updateRoadImg( car_Detector.getFoundObjects() );
+            // situation.updateRoadImg( car_Detector.getFoundObjects() );
             situation.sendPredictedSituation( pe_Detector.getFoundObjects() );
             imshow( CamDef::roadImg, situation.getRoadImg() );
 

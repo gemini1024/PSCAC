@@ -12,10 +12,10 @@
 // param - delay : Delay time to switch from a caution situation to a safety situation
 Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCnt(0) {
     roadImg = UMat::zeros(imgRows, imgCols, CV_8UC3);
-    safetyImg = imread( SignsDef::safety );
-    warningImg = imread( SignsDef::warning );
-    stopImg = imread( SignsDef::stop );
-    if( safetyImg.empty() || warningImg.empty() || stopImg.empty() ) {
+    safetyImg = imread( SignsDef::safety_big );
+    cautionImg = imread( SignsDef::caution_big );
+    dangerImg = imread( SignsDef::danger_big );
+    if( safetyImg.empty() || cautionImg.empty() || dangerImg.empty() ) {
         std::cerr << "ERROR : Could not load signpost image" << std::endl;
         exit(1);
     }
@@ -23,8 +23,8 @@ Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCn
 }
 
 Situation::~Situation() {
-    stopImg.release();
-    warningImg.release();
+    dangerImg.release();
+    cautionImg.release();
     safetyImg.release();
     roadImg.release();
 }
@@ -40,17 +40,20 @@ const UMat& Situation::getRoadImg(void) {
 void Situation::updateRoadImg(const std::vector<Rect>& foundVehicles) {
     // Draw Red line under the vehicles
     for ( auto const& r : foundVehicles ) {
-        rectangle(roadImg, Point(r.tl().x, r.br().y-3), r.br(), Scalar(0,0,255), -1);
+        line(roadImg, Point(r.tl().x, r.br().y), r.br(), Scalar(0,0,255), 1);
     }
+}
 
-    // TODO : Remove when the situation is judged to some extent.
-    if ( !foundVehicles.empty() ) {
-        for( auto const& r : foundVehicles ) {
-            std::cout << "Car : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
-            << r.br().x << "," << r.br().y << "), md = ("
-            << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
-        }
+
+// Load the road image previously created by the call to updateRoadImg()
+void Situation::loadRoadImg(void) {
+    Mat learnedRoadImg = imread( CamDef::learnedRoadImg  );
+    if ( learnedRoadImg.empty() ) {
+        std::cerr << "ERROR : Unable to load learnedRoadImg" << std::endl;
+        exit(1);
     }
+    learnedRoadImg.copyTo(roadImg);
+    learnedRoadImg.release();
 }
 
 
@@ -61,23 +64,21 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
     if ( !foundPedestrians.empty() ) {
        Mat roadMat = roadImg.getMat( ACCESS_READ );
        for( auto const& r : foundPedestrians ) {
-            std::cout << "Human : tl = (" << r.tl().x << "," << r.tl().y << ") , br = ("
-            << r.br().x << "," << r.br().y << "), md = ("
-            << ( r.br().x - r.tl().x )/2 + r.tl().x << "," << ( r.br().y - r.tl().y )/2 + r.tl().y << ")" << std::endl;
 
-
-            // Warns you if one of the top and bottom coordinates in the center of a person object has red coordinates
+            // The detected pedestrian object and roadImg are used to judge the dangerous situation
             int hitCount = 0;
             for( int i=0; i <= 5; i++) {
+                // If the lower 5 coordinates of the center of the object are above roadImg, it is judged to be in state DANGER.
                 if( roadMat.at<Vec3b>(Point( (r.br()-r.tl()).x/2 + r.tl().x, (r.br()-r.tl()).y/4*3 + r.tl().y + i ) )[2] == 255  ) {
                     hitCount++;
                 }
                 if ( hitCount > 3 ) {
-                    setSituation(STOP);
+                    setSituation( DANGER );
                     break;
+                // If it is not the current DANGER state, if the coordinates of both ends of the lower end of the object are roadImg, it is judged as CAUTION state
                 } else if( safeCnt < delay/2 && (roadMat.at<Vec3b>( r.br() )[2] == 255
                     || roadMat.at<Vec3b>(Point( r.tl().x, r.br().y ))[2] == 255 ) ) {
-                    setSituation(WARNING);
+                    setSituation( CAUTION );
                 }
             }
         }
@@ -93,20 +94,20 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
 void Situation::setSituation(int situation) {
     switch(situation) {
         case SAFETY :
-            std::cout << " [[ Safety ]]" << std:: endl;
+            std::cout << " [[ SAFETY ]] This road is safety" << std:: endl;
             imshow( CamDef::sign, safetyImg );
             safeCnt = 0;
             break;
-        case WARNING :
+        case CAUTION :
             sendSignalToParentProcess( SigDef::SIG_WARNING );
-            std::cout << " [[ Warning !! ]] Human are approaching" << std:: endl;
-            imshow( CamDef::sign, warningImg );
+            std::cout << " [[ CAUTION ! ]] Human are approaching" << std:: endl;
+            imshow( CamDef::sign, cautionImg );
             safeCnt = delay/2;
             break;
-        case STOP :
+        case DANGER :
             sendSignalToParentProcess( SigDef::SIG_STOP );
-            std::cout << " [[ STOP !! ]] Human in roadImg " << std:: endl;
-            imshow( CamDef::sign, stopImg );
+            std::cout << " [[ DANGER !! ]] Human in roadImg " << std:: endl;
+            imshow( CamDef::sign, dangerImg );
             safeCnt = delay;
             break;
         default :

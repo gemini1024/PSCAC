@@ -35,10 +35,10 @@ void regSignals(void) {
 void SigDef::signalHandler(int signo) {
     switch(signo) {
         case SIG_WARNING :
-            sendWarning();
+            // sendWarning();
             break;
         case SIG_STOP :
-            sendStop();
+            // sendStop();
             break;
         default :
             break;
@@ -46,13 +46,14 @@ void SigDef::signalHandler(int signo) {
 }
 
 
+// Send the current situation to the server
 void SigDef::sendWarning(void) {
     static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("2,warrning");
+    connServ.sendMessage("2,caution");
 }
 
 void SigDef::sendStop(void) {
     static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("2,stop");
+    connServ.sendMessage("2,dangerous");
 }
 

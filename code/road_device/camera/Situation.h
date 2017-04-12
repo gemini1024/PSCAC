@@ -14,13 +14,13 @@ class Situation {
 private :
     enum {
     	SAFETY,
-    	WARNING,
-    	STOP
+    	CAUTION,
+    	DANGER
     };
     UMat roadImg;
     Mat safetyImg;
-    Mat warningImg;
-    Mat stopImg;
+    Mat cautionImg;
+    Mat dangerImg;
     const int delay;
     int safeCnt;
 
@@ -32,6 +32,7 @@ public :
     ~Situation();
     const UMat& getRoadImg(void);
     void updateRoadImg(const std::vector<Rect>& foundVehicles);
+    void loadRoadImg(void);
     void sendPredictedSituation(const std::vector<Rect>& foundPedestrians);
 };
 
