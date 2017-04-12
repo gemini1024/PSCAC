@@ -14,14 +14,11 @@ using namespace cv;
 
 class BackgroundMask {
 private :
-    // TODO : Select background recognition method
-    // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorMOG2();
-    // Ptr<BackgroundSubtractor> pMask = createBackgroundSubtractorKNN();
-    // Ptr<BackgroundSubtractor> pMask = bgsegm::createBackgroundSubtractorMOG();
     Ptr<bgsegm::BackgroundSubtractorGMG> pMask = bgsegm::createBackgroundSubtractorGMG();
     UMat bgMask; // Mask excluding moving objects
     UMat accumulatedMask;
     int accumulateNumFrames;
+    int noiseRemovalNumFrames;
 
 private :
     void recognizeBackgournd(VideoCapture& vc);
@@ -31,8 +28,10 @@ public :
     BackgroundMask();
     ~BackgroundMask();
     UMat createBackgroundMask(VideoCapture& vc);
-    void printProperties();
+    UMat loadBackgroundMask(void);
+    void printProperties(void);
     void setRecognizeNumFrames(int num);
+    void setNoiseRemovalNumFrames(int num);
     void setAccumulateNumFrames(int num);
     void setLearningRate(double rate);
     void locateForeground(UMat& src, UMat& dst);

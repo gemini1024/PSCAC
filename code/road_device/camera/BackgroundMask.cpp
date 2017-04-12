@@ -9,13 +9,17 @@
 #include <iostream>
 
 
-BackgroundMask::BackgroundMask() : accumulateNumFrames(200) {
+BackgroundMask::BackgroundMask()
+: accumulateNumFrames(600), noiseRemovalNumFrames(12) {
 }
 
 BackgroundMask::~BackgroundMask() {
 }
 
 
+
+// Identify moving areas for a period of time.
+// The area without motion is erased.
 UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
     std::cout << "Recognizing the background ... " << std::endl;
     recognizeBackgournd(vc);
@@ -23,23 +27,39 @@ UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
 
     std::cout << "Creating Mask ... " << std::endl;
     accumulateMasks(vc);
-    std::cout << "Mask creation Complete!" << std::endl;
-
-    std::cout << "Applying opening operation to Mask ... " << std::endl;
+    // Closing operation ( to reduce noise )
     dilate(accumulatedMask, accumulatedMask, UMat());
     erode(accumulatedMask, accumulatedMask, UMat());
-    std::cout << "Opening Complete!" << std::endl;
-
-    imshow( CamDef::mask, accumulatedMask );  // show background mask
+    std::cout << "Mask creation Complete!" << std::endl;
 
     return accumulatedMask;
 }
+
+
+// Road the mask previously created by the call to createBackgroundMask()
+UMat BackgroundMask::loadBackgroundMask(void) {
+    std::cout << "Load Learned BackgroundMask ... " << std::endl;
+
+    Mat maskImg = imread( CamDef::learnedMask, IMREAD_GRAYSCALE  );
+    if ( maskImg.empty() ) {
+        std::cerr << "ERROR : Unable to load learnedMask" << std::endl;
+        exit(0);
+    }
+    maskImg.copyTo(accumulatedMask);
+    maskImg.release();
+
+    std::cout << "Learned BackgroundMask road Complete! " << std::endl;
+
+    return accumulatedMask;
+}
+
+
 
 // Recognize a moving object and wait until a mask using GMG method is created
 void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
     UMat img;
 
-    for(int n = 0; n <= pMask->getNumFrames()+1; n++) {
+    for(int n = 0; n < pMask->getNumFrames(); n++) {
         vc >> img;
         if (img.empty())  {
             std::cerr << "ERROR : Unable to load frame" << std::endl;
@@ -49,7 +69,7 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
         pMask->apply(img, bgMask);
         imshow( CamDef::originalVideo, img );  // show original image
 
-        if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
+        if( waitKey( CamDef::DELAY ) == CamDef::CLOSE ) { // ESC
             std::cout << "Closing the program ..." << std::endl;
             exit(0);
         }
@@ -58,19 +78,20 @@ void BackgroundMask::recognizeBackgournd(VideoCapture& vc) {
     img.release();
 }
 
+
+
 // Determine and accumulate areas with moving objects
 void BackgroundMask::accumulateMasks(VideoCapture& vc) {
     assert(!bgMask.empty());
 
     UMat img;
     bgMask.copyTo(accumulatedMask);
-    int andFrames = 20;
 
-    for(int n = 0; n <= accumulateNumFrames; n += andFrames) {
+    for(int n = 0; n <= accumulateNumFrames; n += noiseRemovalNumFrames) {
 
         UMat tmpMask(bgMask);
 
-        for(int m=0; m<andFrames; m++) {
+        for(int m=0; m<noiseRemovalNumFrames; m++) {
             vc >> img;
             if (img.empty())  {
                 std::cerr << "ERROR : Unable to load frame" << std::endl;
@@ -83,13 +104,14 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
             imshow( CamDef::originalVideo, img );  //  show original image
             imshow( CamDef::mask, accumulatedMask );  // show background mask
 
-            if( waitKey( CamDef::DELAY ) == CamDef::ESC ) {
+            if( waitKey( CamDef::DELAY ) == CamDef::CLOSE ) { // ESC
                 std::cout << "Closing the program ..." << std::endl;
                 exit(0);
             }
         }
 
         // Reduce noise
+        erode(tmpMask, tmpMask, UMat());
         bitwise_or(tmpMask, accumulatedMask, accumulatedMask);
     }
 
@@ -97,24 +119,36 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
 }
 
 
+
+// Check the current setting of BackgroundMask
 void BackgroundMask::printProperties() {
     std::cout << "InitializationFrames : " << pMask->getNumFrames()
     << "\nLearningRate : " << pMask->getDefaultLearningRate()
+    << "\nNoiseRemovalNumFrames : " << noiseRemovalNumFrames
+    << "\nAccumulateNumFrames : " << accumulateNumFrames
     << "\nQuantizationLevels : " << pMask->getQuantizationLevels ()
     << "\nSmoothingRadius : " << pMask->getSmoothingRadius()
     << "\nUpdateBackgroundModel : " << pMask->getUpdateBackgroundModel()
     << std::endl;
 }
 
+
+// Set RecognizeNumFrames of BackgroundSubtractorGMG.
 void BackgroundMask::setRecognizeNumFrames(int num) {
     pMask->setNumFrames(num);
 }
 
+// Specifies the number of frames to be used for noise removal
+void BackgroundMask::setNoiseRemovalNumFrames(int num) {
+    noiseRemovalNumFrames = num;
+}
 
+// Set the number of frames needed to create the mask.
 void BackgroundMask::setAccumulateNumFrames(int num) {
     accumulateNumFrames = num;
 }
 
+// Set LearningRate of BackgroundSubtractorGMG.
 void BackgroundMask::setLearningRate(double rate) {
     pMask->setDefaultLearningRate(rate);
 }
@@ -123,6 +157,13 @@ void BackgroundMask::setLearningRate(double rate) {
 // Only copy the foreground using the completed mask
 void BackgroundMask::locateForeground(UMat& src, UMat& dst) {
     assert(!accumulatedMask.empty());
+
+    // source image equalization
+    cvtColor(src, dst, CV_BGR2GRAY);
+    equalizeHist(dst, dst);
+    cvtColor(dst, src, CV_GRAY2BGR);
     dst.release();
+
+    // mask processing
     src.copyTo(dst, accumulatedMask);
 }

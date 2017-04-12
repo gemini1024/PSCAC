@@ -3,7 +3,7 @@
 
 CC = g++
 DIRS = camera communication
-OBJS = main.o camera.o BackgroundMask.o Detectors.o SigDef.o ConnectServer.o
+OBJS = main.o camera.o BackgroundMask.o Detectors.o Situation.o SigDef.o ConnectServer.o
 TARGET = detect
 
 .SUFFIXES : .cpp .o
@@ -16,7 +16,7 @@ subobj :
 	done
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $(OBJS) `pkg-config opencv --cflags --libs` -pthread
+	$(CC) -o $@ $(OBJS) `pkg-config opencv --cflags --libs` -pthread -O2
 
 clean :
 	@for dir in $(DIRS); do \

@@ -19,9 +19,10 @@ void regSignals(void) {
     // Do not process other signals before current processing is finished
     sigfillset(&act.sa_mask);
     act.sa_handler = SigDef::signalHandler;
+    act.sa_flags = 0;
 
-    if( sigaction(SigDef::SIG_FOUND_HUMAN, &act, NULL) < 0
-        || sigaction(SigDef::SIG_FOUND_CAR, &act, NULL) < 0) {
+    if( sigaction(SigDef::SIG_WARNING, &act, NULL) < 0
+        || sigaction(SigDef::SIG_STOP, &act, NULL) < 0) {
         perror("sigaction");
         exit(1);
     }
@@ -33,11 +34,11 @@ void regSignals(void) {
 // Internal calling functions
 void SigDef::signalHandler(int signo) {
     switch(signo) {
-        case SIG_FOUND_HUMAN :
-            foundPedestrians();
+        case SIG_WARNING :
+            // sendWarning();
             break;
-        case SIG_FOUND_CAR :
-            foundVehicles();
+        case SIG_STOP :
+            // sendStop();
             break;
         default :
             break;
@@ -45,16 +46,14 @@ void SigDef::signalHandler(int signo) {
 }
 
 
-void SigDef::foundPedestrians(void) {
-    // TODO : send data to Server
-    std::cout<< "Found  Pedestrians" << std::endl;
-
-    // static ConnectServer connServ("192.168.0.254", 80);
-    // connServ.sendMessage("Found  Pedestrians");
+// Send the current situation to the server
+void SigDef::sendWarning(void) {
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage("2,caution");
 }
 
-void SigDef::foundVehicles(void) {
-    // TODO : send data to Pedestrians
-    std::cout<< "Found  Vehicles" << std::endl;
+void SigDef::sendStop(void) {
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage("2,dangerous");
 }
 

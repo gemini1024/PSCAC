@@ -1,5 +1,10 @@
-.cpp.o : 
-	g++ -c -std=c++11 -o $@ $<
+# Makefile
+
+CC = g++
+CFLAGS = -c -std=c++11 -O2
+
+.cpp.o :
+	$(CC) $(CFLAGS) -o $@ $<
 
 OBJS = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 
