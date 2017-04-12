@@ -69,8 +69,8 @@ int takeRoad(void)
     bgMask.printProperties();
 
     // Select the source of the mask.
-    UMat mask = bgMask.createBackgroundMask(vc);
-    // UMat mask = bgMask.loadBackgroundMask();
+    // UMat mask = bgMask.createBackgroundMask(vc);
+    UMat mask = bgMask.loadBackgroundMask();
     imshow( CamDef::mask, mask );  // show background mask
 
 
