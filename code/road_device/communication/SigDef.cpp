@@ -35,10 +35,10 @@ void regSignals(void) {
 void SigDef::signalHandler(int signo) {
     switch(signo) {
         case SIG_WARNING :
-            // sendWarning();
+            sendWarning();
             break;
         case SIG_STOP :
-            // sendStop();
+            sendStop();
             break;
         default :
             break;

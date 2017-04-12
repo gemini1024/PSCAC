@@ -40,12 +40,14 @@ PedestriansDetector::~PedestriansDetector() {
 
 void PedestriansDetector::detect(UMat& img) {
     // Find Pedestrians
-    detector.detectMultiScale(img, found, 1.04, 4, 1, Size(30,80), Size(80,200));
+    UMat prototypeROI(img, Rect(Point(0,70), Point(480, 260)));
+    detector.detectMultiScale(prototypeROI, found, 1.04, 4, 1, Size(30,80), Size(80,200));
 
     // Draw Green Rectangle on Pedestrians
     for ( auto const& r : found ) {
-        rectangle(img, r.tl(), r.br(), Scalar(0,255,0), 3);
+        rectangle(prototypeROI, r.tl(), r.br(), Scalar(0,255,0), 3);
     }
+    prototypeROI.release();
 }
 
 

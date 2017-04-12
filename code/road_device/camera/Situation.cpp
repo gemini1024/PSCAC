@@ -76,7 +76,8 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
                     setSituation( DANGER );
                     break;
                 // If it is not the current DANGER state, if the coordinates of both ends of the lower end of the object are roadImg, it is judged as CAUTION state
-                } else if( safeCnt < delay/2 && (roadMat.at<Vec3b>( r.br() )[2] == 255
+                } else if( safeCnt < delay/2 && ( roadMat.at<Vec3b>( r.br() )[2] == 255
+                    || roadMat.at<Vec3b>( Point( r.br().x+100, r.br().y ))[2] == 255
                     || roadMat.at<Vec3b>(Point( r.tl().x, r.br().y ))[2] == 255 ) ) {
                     setSituation( CAUTION );
                 }
