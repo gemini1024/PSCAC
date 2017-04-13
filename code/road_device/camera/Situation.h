@@ -23,6 +23,7 @@ private :
     Mat safetyImg;
     Mat cautionImg;
     Mat dangerImg;
+    // delays
     const int delay;
     int sendDelayCnt;
     int safeCnt;

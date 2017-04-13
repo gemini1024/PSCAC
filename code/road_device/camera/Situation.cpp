@@ -21,6 +21,10 @@ Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), sendDe
         std::cerr << "ERROR : Could not load signpost image" << std::endl;
         exit(1);
     }
+
+    // display FULLSCREEN
+    // namedWindow( CamDef::sign, CV_WND_PROP_FULLSCREEN );
+    // setWindowProperty( CamDef::sign, CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN );
     imshow( CamDef::sign, safetyImg ); // init Signs
 }
 
@@ -89,9 +93,9 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
     }
 
     // After a certain period of time, switch to safety
-    --sendDelayCnt; --safeCnt;
-    if( safeCnt < 0 )
-        setSituation(SAFETY);
+    if( sendDelayCnt > 0 ) sendDelayCnt--;
+    if( safeCnt > 0 ) safeCnt--;
+    else setSituation(SAFETY);
 }
 
 
