@@ -17,11 +17,14 @@ private :
     	CAUTION,
     	DANGER
     };
+    // Used for calculation
     UMat roadImg;
+    // For output only
     Mat safetyImg;
     Mat cautionImg;
     Mat dangerImg;
     const int delay;
+    int sendDelayCnt;
     int safeCnt;
 
 private :

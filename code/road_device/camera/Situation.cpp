@@ -10,7 +10,9 @@
 
 // param - imgRows, imgCols : Get the size of the frame to initialize roadImg
 // param - delay : Delay time to switch from a caution situation to a safety situation
-Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCnt(0) {
+// sendDelayCnt : Reduce the number of communications delay. It is affected by variable 'delay'
+// safeCnt : Delay to keep the warning sign until the safety sign is displayed. It is affected by variable 'delay'
+Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), sendDelayCnt(0), safeCnt(0) {
     roadImg = UMat::zeros(imgRows, imgCols, CV_8UC3);
     safetyImg = imread( SignsDef::safety_big );
     cautionImg = imread( SignsDef::caution_big );
@@ -19,7 +21,7 @@ Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), safeCn
         std::cerr << "ERROR : Could not load signpost image" << std::endl;
         exit(1);
     }
-    imshow( CamDef::sign, safetyImg );
+    imshow( CamDef::sign, safetyImg ); // init Signs
 }
 
 Situation::~Situation() {
@@ -85,8 +87,10 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
         }
         roadMat.release();
     }
+
     // After a certain period of time, switch to safety
-    if( --safeCnt < 0 )
+    --sendDelayCnt; --safeCnt;
+    if( safeCnt < 0 )
         setSituation(SAFETY);
 }
 
@@ -100,13 +104,21 @@ void Situation::setSituation(int situation) {
             safeCnt = 0;
             break;
         case CAUTION :
-            sendSignalToParentProcess( SigDef::SIG_WARNING );
+            if( sendDelayCnt <= 0 ) {
+                sendSignalToParentProcess( SigDef::SIG_CAUTION );
+                std::cout << " [[ SEND_SIGNAL ]] SIG_CAUTION " << std:: endl;
+                sendDelayCnt = delay/2;
+            }
             std::cout << " [[ CAUTION ! ]] Human are approaching" << std:: endl;
             imshow( CamDef::sign, cautionImg );
             safeCnt = delay/2;
             break;
         case DANGER :
-            sendSignalToParentProcess( SigDef::SIG_STOP );
+            if( sendDelayCnt <= delay/2 ) {
+                sendSignalToParentProcess( SigDef::SIG_DANGER );
+                std::cout << " [[ SEND_SIGNAL ]] SIG_DANGER " << std:: endl;
+                sendDelayCnt = delay;
+            }
             std::cout << " [[ DANGER !! ]] Human in roadImg " << std:: endl;
             imshow( CamDef::sign, dangerImg );
             safeCnt = delay;

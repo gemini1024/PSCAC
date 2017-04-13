@@ -21,8 +21,8 @@ void regSignals(void) {
     act.sa_handler = SigDef::signalHandler;
     act.sa_flags = 0;
 
-    if( sigaction(SigDef::SIG_WARNING, &act, NULL) < 0
-        || sigaction(SigDef::SIG_STOP, &act, NULL) < 0) {
+    if( sigaction(SigDef::SIG_CAUTION, &act, NULL) < 0
+        || sigaction(SigDef::SIG_DANGER, &act, NULL) < 0) {
         perror("sigaction");
         exit(1);
     }
@@ -34,11 +34,11 @@ void regSignals(void) {
 // Internal calling functions
 void SigDef::signalHandler(int signo) {
     switch(signo) {
-        case SIG_WARNING :
-            sendWarning();
+        case SIG_CAUTION :
+            sendCaution();
             break;
-        case SIG_STOP :
-            sendStop();
+        case SIG_DANGER :
+            sendDanger();
             break;
         default :
             break;
@@ -47,13 +47,15 @@ void SigDef::signalHandler(int signo) {
 
 
 // Send the current situation to the server
-void SigDef::sendWarning(void) {
+void SigDef::sendCaution(void) {
     static ConnectServer connServ("211.253.29.38", 5001);
     connServ.sendMessage("2,caution");
+    std::cout << " [[ SEND_SERVER ]] 2,caution " << std:: endl;
 }
 
-void SigDef::sendStop(void) {
+void SigDef::sendDanger(void) {
     static ConnectServer connServ("211.253.29.38", 5001);
     connServ.sendMessage("2,dangerous");
+    std::cout << " [[ SEND_SERVER ]] 2,dangerous " << std:: endl;
 }
 
