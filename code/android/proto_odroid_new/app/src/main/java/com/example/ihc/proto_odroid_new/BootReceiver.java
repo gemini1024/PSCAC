@@ -13,11 +13,17 @@ import android.content.Intent;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        //디바이스 부팅이 완료되면 호출됨
         if(intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
-            Intent messageService =  new Intent(context, FirebaseMessagingService.class);
-            Intent tokenService = new Intent(context, FirebaseInstanceIDService.class);
-            context.startService(messageService);
-            context.startService(tokenService);
+            //ACCESS_FIND_LOCATION 권한이 설정되어 있다면 진입
+            GpsInfo gpsInfo = new GpsInfo(context);
+            if(gpsInfo.checkPermission()){
+                //서비스를 실행
+                Intent messageService =  new Intent(context, FirebaseMessagingService.class);
+                Intent tokenService = new Intent(context, FirebaseInstanceIDService.class);
+                context.startService(messageService);
+                context.startService(tokenService);
+            }
         }
     }
 
