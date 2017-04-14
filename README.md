@@ -6,10 +6,10 @@ Intelligent CCTV notifies dangerous situations before a traffic accident occurs.
 It informs the danger situation by the road's LCD and the driver's mobile.
 
 
-![Execution screen](https://drive.google.com/uc?id=0B1JedXj3gY52TWtpa25wVGhMaWc)
+![Execution screen](https://drive.google.com/uc?id=0B1JedXj3gY52MkZNc0pOdVlsd1E)
 
 
-## Team members
+## Developed By
 ```
 * Choi Ji Hun        ( gemini1024 )
 * Im Hyun Chang      ( ihc93 )
@@ -22,7 +22,7 @@ It informs the danger situation by the road's LCD and the driver's mobile.
 * Check out the latest project source code and compile it
 ```
 ~/git clone https://github.com/gemini1024/PSCAC.git
-~/cd PSCAC/cod/road_device
+~/cd PSCAC/code/road_device
 ~/make
 ~/detect
 ```
