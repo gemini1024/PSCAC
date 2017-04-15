@@ -34,7 +34,7 @@ void ConnectServer::sendMessage(const string message) {
     char buf[MESSAGE_SIZE];
 
     bcopy(message.c_str(), buf, MESSAGE_SIZE);
-    if( sendto(sd, buf, strlen(buf)+1, 0, (struct sockaddr *)&sin, sizeof(sin)) == -1 ) {
+    if( sendto(sd, buf, strlen(buf), 0, (struct sockaddr *)&sin, sizeof(sin)) == -1 ) {
         perror("sendto");
         exit(1);
     }

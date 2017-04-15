@@ -6,7 +6,13 @@
 #include <iostream>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "functions.h"
+
+
+// Camera functions.
+extern int takeRoad(void); // ( In camera/camera.cpp )
+// Communication functions.
+extern void regSignals(void); // ( In commuication/Sigdef.cpp )
+
 
 using namespace std;
 
@@ -24,8 +30,7 @@ int main(int argc, char** argv)
             takeRoad();
             cout << "Closing the camera process ..." << endl;
             break;
-        default : // Alert
-            // Send Warning Message until the camera is shut down
+        default : // Send Warning Message until the camera is shut down
             regSignals();
             while(waitpid(pid, NULL, 0) != pid);
             cout<<"Closing the communication process ..."<<endl;

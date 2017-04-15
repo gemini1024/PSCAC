@@ -23,6 +23,8 @@ namespace CamDef {
     const std::string learnedRoadImg("camera/scenario_road.png");
     // const std::string learnedMask("camera/learnedMask_opt.png");
     // const std::string learnedRoadImg("camera/learnedRoadImg_opt.png");
+
+    // Windows name
     const std::string originalVideo("origin");
     const std::string mask("mask");
     const std::string roadImg("roadImg");
