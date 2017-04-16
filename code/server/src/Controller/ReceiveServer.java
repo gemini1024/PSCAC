@@ -47,8 +47,8 @@ public class ReceiveServer {
 				String str = msg; // 예시 2, dangerous
 				String[] values = str.split(",");
 				vo.setId(values[0]);
-				vo.setStatus(values[1]);
-
+				vo.setStatus(values[1]);				
+				
 				pgps.receiveAlarm(vo);
 				
 				System.out.println("Alarm Text save in pscacvo");

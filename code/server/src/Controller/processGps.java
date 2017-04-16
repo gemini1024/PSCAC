@@ -43,7 +43,9 @@ public class processGps {
 		fcmvo.setLatitude(latitude);
 		fcmvo.setLongitude(longtitud);
 		
-		fcmvo.setAlarm("default");
+		System.out.println(vo.getStatus());
+		String status = vo.getStatus();
+		fcmvo.setAlarm(status);
 		fcmvo.setTitle("alert");
 		
 		send.pushFCMNotification(fcmvo);

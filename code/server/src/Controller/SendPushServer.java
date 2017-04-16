@@ -47,7 +47,7 @@ public class SendPushServer {
 		
 		message.setLatitude(fcmvo.getLatitude());
 		message.setLongitude(fcmvo.getLongitude());
-		message.setAlarm("default");
+		message.setAlarm(fcmvo.getAlarm());
 		
 		String to = "/topics/alert";
 
@@ -58,7 +58,7 @@ public class SendPushServer {
 		Map<String, Object> data = new HashMap<>();
 		data.put("data", message);
 		data.put("to", to);
-		String jsonStr = gson.toJson(data, HashMap.class);
+		String jsonStr = gson.toJson(data, HashMap.class).replaceAll("\\u0000", "");
 
 		System.out.println(jsonStr);
 
