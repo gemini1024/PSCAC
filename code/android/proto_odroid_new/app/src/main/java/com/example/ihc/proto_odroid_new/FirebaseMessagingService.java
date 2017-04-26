@@ -182,18 +182,16 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //경보가 디폴트일때, 디폴트경보발생(푸시알림 및 소리)
         if (info.getMessage().equals("default") || info.getMessage().equals("dangerous")) {
-            notificationBuilder.setContentText("주변에 차도횡단보행자 감지!\n주의해주세요");
-            notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.alert_default));
-            notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
-            result = info;
+            notificationBuilder.setContentText("주변 차도에 보행자가 있습니다!");
+            notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.warinngmp3));
         }
 
         if(info.getMessage().equals("caution")){
-            notificationBuilder.setContentText("주변에 차도횡단보행자 감지!\n주의해주세요");
-            notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.alert_default));
-            notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
-            result = info;
+            notificationBuilder.setContentText("주변 보행자가 차도로 접근 중입니다!");
+            notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.cautionmp3));
         }
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        result = info;
 
         return result;
     }
