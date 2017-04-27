@@ -8,16 +8,17 @@
 
 
 void sendSignalToParentProcess(int signo);
-void regSignals(void);
+void regSignals(int deviceId);
 
 namespace SigDef {
     enum {
-        SIG_WARNING = SIGUSR1,
-        SIG_STOP = SIGUSR2
+        SIG_CAUTION = SIGUSR1,
+        SIG_DANGER = SIGUSR2
     };
+    static unsigned int deviceId;
     void signalHandler(int signo);
-    void sendWarning(void);
-    void sendStop(void);
+    void sendCaution(void);
+    void sendDanger(void);
 }
 
 

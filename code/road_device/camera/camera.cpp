@@ -38,25 +38,33 @@ void detectObjects(Detector& detector, UMat& fgimg) {
 
 
 
+
 //It is called from main().
 // Performs overall operations using the camera.
-int takeRoad(void)
+int takeRoad(std::string videoSource)
 {
-    // Select the source of the video.
+    UMat img, fgimg; // using OpenCL ( UMat )
+    // Import pre-learned shape recognition data
+    PedestriansDetector pe_Detector;
+    VehiclesDetector car_Detector;
 
-    /* // Connect camera
-    VideoCapture vc(0);
-    vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-    vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-    vc.set(CV_CAP_PROP_FPS, 12);
-    */
-    // Load test video
-    VideoCapture vc( CamDef::sampleVideo );
+
+    // Select the source of the video.
+    VideoCapture vc;
+    if ( videoSource == "CAMERA" ) {
+        /// Connect camera
+        vc.open(0);
+        vc.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+        vc.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+        vc.set(CV_CAP_PROP_FPS, 12);
+    } else {
+        // Load test video
+        vc.open( videoSource );
+    }
     if (!vc.isOpened()) {
-        std::cerr << "ERROR : Cannot open the camera" << std::endl;
+        std::cerr << "ERROR : Cannot open video source : " << videoSource << std::endl;
         return false;
     }
-
 
 
 
@@ -66,7 +74,7 @@ int takeRoad(void)
     bgMask.setNoiseRemovalNumFrames( vc.get(CV_CAP_PROP_FPS) ); // Default : 12
     bgMask.setAccumulateNumFrames(300); // Default : 600
     bgMask.setLearningRate(0.025); // Default : 0.025
-    bgMask.printProperties();
+    // bgMask.printProperties();
 
     // Select the source of the mask.
     UMat mask = bgMask.createBackgroundMask(vc);
@@ -76,62 +84,74 @@ int takeRoad(void)
 
 
 
-    UMat img, fgimg; // using OpenCL ( UMat )
-    PedestriansDetector pe_Detector;
-    VehiclesDetector car_Detector;
-    Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS)*2.5 );
-    situation.loadRoadImg();
+    // Update the road image
+    std::cout << "Recognizing the Road image ..." << std::endl;
+    Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS)*4 );
+    // situation.loadRoadImg();
+    unsigned int learnDelay = 300;
+    while( learnDelay-- ) {
+        // Put the captured image in img
+        vc >> img;
+        if (img.empty())  {
+            std::cerr << "ERROR : Unable to load frame" << std::endl;
+            break;
+        }
+        imshow( CamDef::originalVideo, img );
+
+        // Recognize vehicles in video
+        bgMask.locateForeground(img, fgimg);
+        car_Detector.detect(fgimg);
+
+        // Update the road image
+        situation.updateRoadImg( car_Detector.getFoundObjects() );
+        imshow( CamDef::roadImg, situation.getRoadImg() );
+        imshow( CamDef::resultVideo, fgimg );
+
+        if( CamDef::shouldStop() ) learnDelay = 0;
+    }
+    std::cout << "Road image creation Complete!" << std::endl;
+    situation.trimeRoadImg();
+
+
 
 
     std::cout << "Start Detection ..." << std::endl;
-    bool playVideo = true; char pressedKey;
-    while (1) {
+    bool isDetecting = true;
+    while ( isDetecting ) {
 
-        if(playVideo) {
-            // Put the captured image in img
-            vc >> img;
-            if (img.empty())  {
-                std::cerr << "ERROR : Unable to load frame" << std::endl;
-                break;
-            }
-            // show original image
-            imshow( CamDef::originalVideo, img );
-
-
-            // Exclude areas excluding road areas in the original image.
-            bgMask.locateForeground(img, fgimg);
-
-            // Detect pedestrians and vehicle
-            // Detect pedestrians and vehicle
-            std::thread t1(detectObjects, std::ref(pe_Detector), std::ref(fgimg));
-            std::thread t2(detectObjects, std::ref(car_Detector), std::ref(fgimg));
-            t1.join();
-            t2.join();
-
-
-            // Judge the situation of the road
-            // situation.updateRoadImg( car_Detector.getFoundObjects() );
-            situation.sendPredictedSituation( pe_Detector.getFoundObjects() );
-            imshow( CamDef::roadImg, situation.getRoadImg() );
-
-
-            // show image processing result
-            imshow( CamDef::resultVideo, fgimg );
-        }
-
-
-        // press SPACE BAR -> pause video
-        // press ESC -> close video
-        if ( ( pressedKey = waitKey( CamDef::DELAY ) ) == CamDef::PAUSE ) // SPACE BAR
-            playVideo = !playVideo;
-        else if(  pressedKey == CamDef::CLOSE ) { // ESC
-            std::cout << "Disconnecting from camera and returning resources ..." << std::endl;
+        // Put the captured image in img
+        vc >> img;
+        if (img.empty())  {
+            std::cerr << "ERROR : Unable to load frame" << std::endl;
             break;
         }
+        imshow( CamDef::originalVideo, img );
+
+
+        // Exclude areas excluding road areas in the original image.
+        bgMask.locateForeground(img, fgimg);
+
+        // Detect pedestrians and vehicle
+        // Detect pedestrians and vehicle
+        std::thread t1(detectObjects, std::ref(pe_Detector), std::ref(fgimg));
+        std::thread t2(detectObjects, std::ref(car_Detector), std::ref(fgimg));
+        t1.join();
+        t2.join();
+
+
+        // Judge the situation of the road
+        situation.sendPredictedSituation( pe_Detector.getFoundObjects(), car_Detector.isFound() );
+        imshow( CamDef::roadImg, situation.getRoadImg() );
+
+
+        // show image processing result
+        imshow( CamDef::resultVideo, fgimg );
+        if( CamDef::shouldStop() ) isDetecting = false;
     }
 
 
     // Return resources.
+    std::cout << "Disconnecting from camera and returning resources ..." << std::endl;
     destroyAllWindows();
     img.release();
     fgimg.release();

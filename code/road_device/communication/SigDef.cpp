@@ -13,7 +13,8 @@ void sendSignalToParentProcess(int signo) {
     kill(getppid(), signo);
 }
 
-void regSignals(void) {
+void regSignals(int deviceId) {
+    SigDef::deviceId = deviceId;
     struct sigaction act;
 
     // Do not process other signals before current processing is finished
@@ -21,8 +22,8 @@ void regSignals(void) {
     act.sa_handler = SigDef::signalHandler;
     act.sa_flags = 0;
 
-    if( sigaction(SigDef::SIG_WARNING, &act, NULL) < 0
-        || sigaction(SigDef::SIG_STOP, &act, NULL) < 0) {
+    if( sigaction(SigDef::SIG_CAUTION, &act, NULL) < 0
+        || sigaction(SigDef::SIG_DANGER, &act, NULL) < 0) {
         perror("sigaction");
         exit(1);
     }
@@ -34,11 +35,11 @@ void regSignals(void) {
 // Internal calling functions
 void SigDef::signalHandler(int signo) {
     switch(signo) {
-        case SIG_WARNING :
-            // sendWarning();
+        case SIG_CAUTION :
+            sendCaution();
             break;
-        case SIG_STOP :
-            // sendStop();
+        case SIG_DANGER :
+            sendDanger();
             break;
         default :
             break;
@@ -47,13 +48,17 @@ void SigDef::signalHandler(int signo) {
 
 
 // Send the current situation to the server
-void SigDef::sendWarning(void) {
-    static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("2,caution");
+void SigDef::sendCaution(void) {
+    std::string sentence = std::to_string(deviceId) + ",caution";
+    // static ConnectServer connServ("211.253.29.38", 5001);
+    // connServ.sendMessage(sentence);
+    std::cout << " [[ SEND_SERVER ]] " << sentence << std:: endl;
 }
 
-void SigDef::sendStop(void) {
-    static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("2,dangerous");
+void SigDef::sendDanger(void) {
+    std::string sentence = std::to_string(deviceId) + ",dangerous";
+    // static ConnectServer connServ("211.253.29.38", 5001);
+    // connServ.sendMessage(sentence);
+    std::cout << " [[ SEND_SERVER ]] " << sentence << std:: endl;
 }
 
