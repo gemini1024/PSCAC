@@ -64,7 +64,7 @@ void Situation::loadRoadImg(void) {
 
 
 // Predicts a dangerous situation and generates a corresponding signal
-void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians) {
+void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians, bool isCarOnRoad) {
 
     // TODO : Store the coordinates for a period of time and predict the risk situation.
     if ( !foundPedestrians.empty() ) {
@@ -79,13 +79,13 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
                     hitCount++;
                 }
                 if ( hitCount > 3 ) {
-                    setSituation( DANGER );
+                    setSituation( DANGER, isCarOnRoad );
                     break;
                 // If it is not the current DANGER state, if the coordinates of both ends of the lower end of the object are roadImg, it is judged as CAUTION state
                 } else if( safeCnt < delay/2 && ( roadMat.at<Vec3b>( r.br() )[2] == 255
                     || roadMat.at<Vec3b>( Point( r.br().x+100, r.br().y ))[2] == 255
                     || roadMat.at<Vec3b>(Point( r.tl().x, r.br().y ))[2] == 255 ) ) {
-                    setSituation( CAUTION );
+                    setSituation( CAUTION, isCarOnRoad );
                 }
             }
         }
@@ -95,12 +95,12 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
     // After a certain period of time, switch to safety
     if( sendDelayCnt > 0 ) sendDelayCnt--;
     if( safeCnt > 0 ) safeCnt--;
-    else setSituation(SAFETY);
+    else setSituation(SAFETY, isCarOnRoad);
 }
 
 
 // Set the current status and send it to LCD
-void Situation::setSituation(int situation) {
+void Situation::setSituation(int situation, bool isCarOnRoad) {
     switch(situation) {
         case SAFETY :
             std::cout << " [[ SAFETY ]] This road is safety" << std:: endl;
@@ -108,7 +108,7 @@ void Situation::setSituation(int situation) {
             safeCnt = 0;
             break;
         case CAUTION :
-            if( sendDelayCnt <= 0 ) {
+            if( sendDelayCnt <= 0 && isCarOnRoad) {
                 sendSignalToParentProcess( SigDef::SIG_CAUTION );
                 std::cout << " [[ SEND_SIGNAL ]] SIG_CAUTION " << std:: endl;
                 sendDelayCnt = delay/2;
@@ -118,7 +118,7 @@ void Situation::setSituation(int situation) {
             safeCnt = delay/2;
             break;
         case DANGER :
-            if( sendDelayCnt <= delay/2 ) {
+            if( sendDelayCnt <= delay/2 && isCarOnRoad) {
                 sendSignalToParentProcess( SigDef::SIG_DANGER );
                 std::cout << " [[ SEND_SIGNAL ]] SIG_DANGER " << std:: endl;
                 sendDelayCnt = delay;

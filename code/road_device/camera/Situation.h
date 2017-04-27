@@ -29,7 +29,7 @@ private :
     int safeCnt;
 
 private :
-    void setSituation(int situation);
+    void setSituation(int situation, bool isCarOnRoad);
 
 public :
     Situation(int imgRows, int imgCols, int delay);
@@ -37,7 +37,7 @@ public :
     const UMat& getRoadImg(void);
     void updateRoadImg(const std::vector<Rect>& foundVehicles);
     void loadRoadImg(void);
-    void sendPredictedSituation(const std::vector<Rect>& foundPedestrians);
+    void sendPredictedSituation(const std::vector<Rect>& foundPedestrians, bool isCarOnRoad);
 };
 
 

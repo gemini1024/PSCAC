@@ -13,7 +13,8 @@ void sendSignalToParentProcess(int signo) {
     kill(getppid(), signo);
 }
 
-void regSignals(void) {
+void regSignals(int deviceId) {
+    SigDef::deviceId = deviceId;
     struct sigaction act;
 
     // Do not process other signals before current processing is finished
@@ -48,14 +49,16 @@ void SigDef::signalHandler(int signo) {
 
 // Send the current situation to the server
 void SigDef::sendCaution(void) {
-    static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("2,caution");
-    std::cout << " [[ SEND_SERVER ]] 2,caution " << std:: endl;
+    std::string sentence = std::to_string(deviceId) + ",caution";
+    // static ConnectServer connServ("211.253.29.38", 5001);
+    // connServ.sendMessage(sentence);
+    std::cout << " [[ SEND_SERVER ]] " << sentence << std:: endl;
 }
 
 void SigDef::sendDanger(void) {
-    static ConnectServer connServ("211.253.29.38", 5001);
-    connServ.sendMessage("2,dangerous");
-    std::cout << " [[ SEND_SERVER ]] 2,dangerous " << std:: endl;
+    std::string sentence = std::to_string(deviceId) + ",dangerous";
+    // static ConnectServer connServ("211.253.29.38", 5001);
+    // connServ.sendMessage(sentence);
+    std::cout << " [[ SEND_SERVER ]] " << sentence << std:: endl;
 }
 

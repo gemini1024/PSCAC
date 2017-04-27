@@ -111,7 +111,7 @@ int takeRoad(void)
 
             // Judge the situation of the road
             // situation.updateRoadImg( car_Detector.getFoundObjects() );
-            situation.sendPredictedSituation( pe_Detector.getFoundObjects() );
+            situation.sendPredictedSituation( pe_Detector.getFoundObjects(), car_Detector.isFound() );
             imshow( CamDef::roadImg, situation.getRoadImg() );
 
 
