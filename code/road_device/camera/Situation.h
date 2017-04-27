@@ -36,6 +36,7 @@ public :
     ~Situation();
     const UMat& getRoadImg(void);
     void updateRoadImg(const std::vector<Rect>& foundVehicles);
+    void trimeRoadImg(void);
     void loadRoadImg(void);
     void sendPredictedSituation(const std::vector<Rect>& foundPedestrians, bool isCarOnRoad);
 };

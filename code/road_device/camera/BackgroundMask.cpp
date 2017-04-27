@@ -104,10 +104,7 @@ void BackgroundMask::accumulateMasks(VideoCapture& vc) {
             imshow( CamDef::originalVideo, img );  //  show original image
             imshow( CamDef::mask, accumulatedMask );  // show background mask
 
-            if( waitKey( CamDef::DELAY ) == CamDef::CLOSE ) { // ESC
-                std::cout << "Closing the program ..." << std::endl;
-                exit(0);
-            }
+            if( CamDef::shouldStop() ) n = accumulateNumFrames;
         }
 
         // Reduce noise

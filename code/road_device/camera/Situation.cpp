@@ -50,6 +50,18 @@ void Situation::updateRoadImg(const std::vector<Rect>& foundVehicles) {
     }
 }
 
+// Stabilize road images by removing impulses
+void Situation::trimeRoadImg(void) {
+    dilate(roadImg, roadImg, UMat());
+    dilate(roadImg, roadImg, UMat());
+    dilate(roadImg, roadImg, UMat());
+    erode(roadImg, roadImg, UMat());
+    erode(roadImg, roadImg, UMat());
+    erode(roadImg, roadImg, UMat());
+    erode(roadImg, roadImg, UMat());
+    dilate(roadImg, roadImg, UMat());
+}
+
 
 // Load the road image previously created by the call to updateRoadImg()
 void Situation::loadRoadImg(void) {
