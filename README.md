@@ -24,5 +24,5 @@ It informs the danger situation by the road's LCD and the driver's mobile.
 ~/git clone https://github.com/gemini1024/PSCAC.git
 ~/cd PSCAC/code/road_device
 ~/make
-~/detect
+~/detect <device id> <video source>
 ```
