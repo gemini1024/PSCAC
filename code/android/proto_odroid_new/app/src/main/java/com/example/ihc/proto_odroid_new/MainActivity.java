@@ -9,11 +9,13 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.ListView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -24,8 +26,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng startingPoint = new LatLng(37.3402850, 126.7335080);
     private GoogleMap gMap;
     private MapFragment gmapFragment;
-    private int DEFAULT_ZOOM_LEVEL = 16;
+    private int DEFAULT_ZOOM_LEVEL = 18;
     private ListView historyListView;
+
+    //데이터베이스
+//    AlertHistoryDBHelper database = new ;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +38,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         new GpsInfo().requestPermission(this);
         //fcm푸시메세지 topic설정. 플래그개념. 서버에서 전체 전송할 때, 내부적으로 이 설정값에 따라 받을지 말지 결정(추측)
         FirebaseMessaging.getInstance().subscribeToTopic("alert");
-        historyListView = (ListView)findViewById(R.id.history_listview);
+//        historyListView = (ListView)findViewById(R.id.history_listview);
 
         //알림을 눌러서 액티비티에 접근한 경우
         if(getIntent().hasCategory("noti")){
@@ -84,6 +89,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("메인액티비티","디스트로이");
     }
 
+
+
     /**
      * OnMapReady 는 map이 사용가능하면 호출되는 콜백 메소드
      * 여기서 marker 나 line, listener, camera 이동 등을 설정해두면 됩니다.
@@ -91,9 +98,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
+        //지도셋팅값( 기본값 )
+        CameraPosition.Builder builder = new CameraPosition.Builder();
+        builder.zoom(DEFAULT_ZOOM_LEVEL); //줌 설정
+        builder.bearing(300); //회전 각도 설정
+        builder.tilt(50);  //바라보는 기울기
+
+
         //지도프래그먼트의 가로세로크기구하기(모든 디바이스에 비례하여 마커크기를 지정하기 위함)
         double width = gmapFragment.getActivity().getWindowManager().getDefaultDisplay().getWidth();
         double height = gmapFragment.getActivity().getWindowManager().getDefaultDisplay().getHeight();
+
 
         if(getIntent().hasCategory("noti")){
             Log.d("noti온맵레디","실행");
@@ -107,10 +122,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //마커옵션에 경보발생구역, 현재위치 설정
             MarkerOptions targOpt = new MarkerOptions();
             MarkerOptions devOpt = new MarkerOptions();
-            targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("child",(int)width/10,(int)height/14)));
+
+            //경보 종류에 따른 경보발생구역 이미지 설정
+            if(getIntent().getExtras().getString("alert").equals("default") || getIntent().getExtras().getString("alert").equals("dangerous"))
+                targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("caution",(int)width/10,(int)height/18)));
+            else if(getIntent().getExtras().getString("alert").equals("caution"))
+                targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("warning",(int)width/10,(int)height/18)));
             targOpt.position(new LatLng(targ_latitude,targ_longitude));
+
             devOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("car",(int)width/8,(int)height/24)));
             devOpt.position(new LatLng(dev_latitude,dev_longitude));
+
             //마커에 표시할 타이틀 입력
             targOpt.title("위험발생구역");
             targOpt.snippet("어린이 차도 횡단 중");
@@ -121,10 +143,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             googleMap.addMarker(devOpt).showInfoWindow();
             googleMap.addMarker(targOpt).showInfoWindow();
 
+
+
+
+
             //경보발생구역으로 지도 포커스 이동
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(targ_latitude,targ_longitude),DEFAULT_ZOOM_LEVEL));
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(targ_latitude,targ_longitude),DEFAULT_ZOOM_LEVEL));
+            //카메라 중심 좌표 설정( 경보구역으로)
+            builder.target(calcMid(new LatLng(dev_latitude,dev_longitude),new LatLng(targ_latitude,targ_longitude)));
+            //해당 설정값을 지도에 적용
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+            googleMap.moveCamera(cameraUpdate);
+
             return;
         }
+
         Location mLocation = new GpsInfo(this).getLocationInService();
         if(mLocation != null){
             Log.d("normal온맵레디","로케이션 있을때");
@@ -137,7 +170,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             curOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("car",(int)width/8,(int)height/24)));
             //지도에 마커 추가 및 표시
             googleMap.addMarker(curOpt).showInfoWindow();
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM_LEVEL));
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM_LEVEL));
+            //카메라 중심 좌표 설정( 경보구역으로)
+            builder.target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+            //해당 설정값을 지도에 적용
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+            googleMap.moveCamera(cameraUpdate);
         }
         else {
             Log.d("normal온맵레디","로케이션 없을때");
@@ -148,7 +186,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             curOpt.title("기준위치!");
             //지도에 마커 추가 및 표시
             googleMap.addMarker(curOpt).showInfoWindow();
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startingPoint, DEFAULT_ZOOM_LEVEL));
+            //카메라 중심 좌표 설정( 경보구역으로)
+            builder.target(startingPoint);
+            //해당 설정값을 지도에 적용
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+            googleMap.moveCamera(cameraUpdate);
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startingPoint, DEFAULT_ZOOM_LEVEL));
         }
 
 
@@ -159,6 +202,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         return resizedBitmap;
     }
 
+    private LatLng calcMid(LatLng a,LatLng b){
+        return new LatLng((Math.max(a.latitude,b.latitude) - Math.min(a.latitude,b.latitude)) / 2 + Math.min(a.latitude,b.latitude),
+                (Math.max(a.longitude,b.longitude) - Math.min(a.longitude,b.longitude)) / 2 + Math.min(a.longitude,b.longitude));
+    }
 
 
 //    //권한체크 후 호출되는 콜백 메소드
