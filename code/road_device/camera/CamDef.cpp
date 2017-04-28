@@ -1,4 +1,4 @@
-// CamDef.h
+// CamDef.cpp
 // Defines what the camera module needs
 
 
