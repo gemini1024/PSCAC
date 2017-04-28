@@ -50,15 +50,15 @@ void SigDef::signalHandler(int signo) {
 // Send the current situation to the server
 void SigDef::sendCaution(void) {
     std::string sentence = std::to_string(deviceId) + ",caution";
-    // static ConnectServer connServ("211.253.29.38", 5001);
-    // connServ.sendMessage(sentence);
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage(sentence);
     std::cout << " [[ SEND_SERVER ]] " << sentence << std:: endl;
 }
 
 void SigDef::sendDanger(void) {
     std::string sentence = std::to_string(deviceId) + ",dangerous";
-    // static ConnectServer connServ("211.253.29.38", 5001);
-    // connServ.sendMessage(sentence);
+    static ConnectServer connServ("211.253.29.38", 5001);
+    connServ.sendMessage(sentence);
     std::cout << " [[ SEND_SERVER ]] " << sentence << std:: endl;
 }
 
