@@ -83,42 +83,20 @@ int takeRoad(std::string videoSource)
 
 
 
-
     // Update the road image
-    std::cout << "Recognizing the Road image ..." << std::endl;
     Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS)*4 );
+
+    // Select the source of the roadImg.
+    situation.createRoadImg(vc, bgMask, car_Detector, 300);
     // situation.loadRoadImg();
-    unsigned int learnDelay = 300;
-    while( learnDelay-- ) {
-        // Put the captured image in img
-        vc >> img;
-        if (img.empty())  {
-            std::cerr << "ERROR : Unable to load frame" << std::endl;
-            break;
-        }
-        imshow( CamDef::originalVideo, img );
-
-        // Recognize vehicles in video
-        bgMask.locateForeground(img, fgimg);
-        car_Detector.detect(fgimg);
-
-        // Update the road image
-        situation.updateRoadImg( car_Detector.getFoundObjects() );
-        imshow( CamDef::roadImg, situation.getRoadImg() );
-        imshow( CamDef::resultVideo, fgimg );
-
-        if( CamDef::shouldStop() ) learnDelay = 0;
-    }
-    std::cout << "Road image creation Complete!" << std::endl;
-    situation.trimeRoadImg();
-
+    imshow( CamDef::roadImg, situation.getRoadImg() );
+    situation.setSignToFullScreen();
 
 
 
     std::cout << "Start Detection ..." << std::endl;
     bool isDetecting = true;
     while ( isDetecting ) {
-
         // Put the captured image in img
         vc >> img;
         if (img.empty())  {
@@ -141,7 +119,6 @@ int takeRoad(std::string videoSource)
 
         // Judge the situation of the road
         situation.sendPredictedSituation( pe_Detector.getFoundObjects(), car_Detector.isFound() );
-        imshow( CamDef::roadImg, situation.getRoadImg() );
 
 
         // show image processing result

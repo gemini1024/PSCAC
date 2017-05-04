@@ -6,6 +6,8 @@
 
 
 #include <opencv2/opencv.hpp>
+#include "BackgroundMask.h"
+#include "Detectors.h"
 
 using namespace cv;
 
@@ -30,14 +32,15 @@ private :
 
 private :
     void setSituation(int situation, bool isCarOnRoad);
+    void trimeRoadImg(void);
 
 public :
     Situation(int imgRows, int imgCols, int delay);
     ~Situation();
     const UMat& getRoadImg(void);
-    void updateRoadImg(const std::vector<Rect>& foundVehicles);
-    void trimeRoadImg(void);
+    void createRoadImg(VideoCapture& vc, BackgroundMask& bgMask, VehiclesDetector& car_Detector, unsigned int accumulateNumFrames);
     void loadRoadImg(void);
+    void setSignToFullScreen(void);
     void sendPredictedSituation(const std::vector<Rect>& foundPedestrians, bool isCarOnRoad);
 };
 
