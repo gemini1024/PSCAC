@@ -1,5 +1,6 @@
 package com.example.ihc.proto_odroid_new;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
@@ -58,18 +59,17 @@ public class GpsInfo extends Service implements LocationListener {
     * 권한설정이 되어있다면 true, 아니면 false반환
     */
     public boolean checkPermission(){
-        boolean result = false;
-
         if(mContext == null)    return false;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
+                    == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
                 //권한이 있다면
-                result = true;
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
     /*
@@ -205,20 +205,20 @@ public class GpsInfo extends Service implements LocationListener {
     /**
      * GPS 종료
      * */
-    public void stopUsingGpsInService(){
-        if(mContext == null)    return;
-        if(locationManager != null){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (ContextCompat.checkSelfPermission(mContext,android.Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    //현재 ACCESS_FIND_LOCATION 권한 획득되어있는지 체크. 만약 획득이 되지 않았다면 진입
-                }else {
-                    Log.d("지피에스서비스중지","중지");
-                    locationManager.removeUpdates(GpsInfo.this);
-                }
-            }
-        }
-    }
+//    public void stopUsingGpsInService(){
+//        if(mContext == null)    return;
+//        if(locationManager != null){
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                if (ContextCompat.checkSelfPermission(mContext,android.Manifest.permission.ACCESS_FINE_LOCATION)
+//                        != PackageManager.PERMISSION_GRANTED) {
+//                    //현재 ACCESS_FIND_LOCATION 권한 획득되어있는지 체크. 만약 획득이 되지 않았다면 진입
+//                }else {
+//                    Log.d("지피에스서비스중지","중지");
+//                    locationManager.removeUpdates(GpsInfo.this);
+//                }
+//            }
+//        }
+//    }
 
 
     /**

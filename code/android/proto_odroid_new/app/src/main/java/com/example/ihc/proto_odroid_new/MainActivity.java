@@ -2,7 +2,6 @@ package com.example.ihc.proto_odroid_new;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -125,12 +124,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             //경보 종류에 따른 경보발생구역 이미지 설정
             if(getIntent().getExtras().getString("alert").equals("default") || getIntent().getExtras().getString("alert").equals("dangerous"))
-                targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("caution",(int)width/10,(int)height/18)));
+                targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("icon_caution",(int)width/10,(int)height/18)));
             else if(getIntent().getExtras().getString("alert").equals("caution"))
-                targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("warning",(int)width/10,(int)height/18)));
+                targOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("icon_warning",(int)width/10,(int)height/18)));
             targOpt.position(new LatLng(targ_latitude,targ_longitude));
 
-            devOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("car",(int)width/8,(int)height/24)));
+            devOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("icon_car",(int)width/8,(int)height/24)));
             devOpt.position(new LatLng(dev_latitude,dev_longitude));
 
             //마커에 표시할 타이틀 입력
@@ -158,41 +157,41 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
 
-        Location mLocation = new GpsInfo(this).getLocationInService();
-        if(mLocation != null){
-            Log.d("normal온맵레디","로케이션 있을때");
-            //마커옵션에 경보발생구역, 현재위치 설정
-            MarkerOptions curOpt = new MarkerOptions();
-            curOpt.position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
-            //마커에 표시할 타이틀 입력
-            curOpt.title("내 위치");
-//            curOpt.icon(BitmapDescriptorFactory.fromResource(R.drawable.car));
-            curOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("car",(int)width/8,(int)height/24)));
-            //지도에 마커 추가 및 표시
-            googleMap.addMarker(curOpt).showInfoWindow();
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM_LEVEL));
-            //카메라 중심 좌표 설정( 경보구역으로)
-            builder.target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
-            //해당 설정값을 지도에 적용
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
-            googleMap.moveCamera(cameraUpdate);
-        }
-        else {
-            Log.d("normal온맵레디","로케이션 없을때");
-            //마커옵션에 경보발생구역, 현재위치 설정
-            MarkerOptions curOpt = new MarkerOptions();
-            curOpt.position(startingPoint);
-            //마커에 표시할 타이틀 입력
-            curOpt.title("기준위치!");
-            //지도에 마커 추가 및 표시
-            googleMap.addMarker(curOpt).showInfoWindow();
-            //카메라 중심 좌표 설정( 경보구역으로)
-            builder.target(startingPoint);
-            //해당 설정값을 지도에 적용
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
-            googleMap.moveCamera(cameraUpdate);
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startingPoint, DEFAULT_ZOOM_LEVEL));
-        }
+//        Location mLocation = new GpsInfo(this).getLocationInService();
+//        if(mLocation != null){
+//            Log.d("normal온맵레디","로케이션 있을때");
+//            //마커옵션에 경보발생구역, 현재위치 설정
+//            MarkerOptions curOpt = new MarkerOptions();
+//            curOpt.position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+//            //마커에 표시할 타이틀 입력
+//            curOpt.title("내 위치");
+////            curOpt.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car));
+//            curOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("icon_car",(int)width/8,(int)height/24)));
+//            //지도에 마커 추가 및 표시
+//            googleMap.addMarker(curOpt).showInfoWindow();
+////            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM_LEVEL));
+//            //카메라 중심 좌표 설정( 경보구역으로)
+//            builder.target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+//            //해당 설정값을 지도에 적용
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+//            googleMap.moveCamera(cameraUpdate);
+//        }
+//        else {
+//            Log.d("normal온맵레디","로케이션 없을때");
+//            //마커옵션에 경보발생구역, 현재위치 설정
+//            MarkerOptions curOpt = new MarkerOptions();
+//            curOpt.position(startingPoint);
+//            //마커에 표시할 타이틀 입력
+//            curOpt.title("기준위치!");
+//            //지도에 마커 추가 및 표시
+//            googleMap.addMarker(curOpt).showInfoWindow();
+//            //카메라 중심 좌표 설정( 경보구역으로)
+//            builder.target(startingPoint);
+//            //해당 설정값을 지도에 적용
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+//            googleMap.moveCamera(cameraUpdate);
+////            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startingPoint, DEFAULT_ZOOM_LEVEL));
+//        }
 
 
     }
@@ -290,8 +289,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             // 아이템 내 각 위젯에 데이터 반영
             if(item != null && (item.getMessage().equals("default") || item.getMessage().equals("dangerous")))
                 iconImageView.setImageResource(R.drawable.warning);
-            if(item != null && item.getMessage().equals("caution"))
-                iconImageView.setImageResource(R.drawable.caution);
+            if(item != null && item.getMessage().equals("icon_caution"))
+                iconImageView.setImageResource(R.drawable.icon_caution);
 
             time.setText(item.getTime());
             address.setText(item.getAddress());
