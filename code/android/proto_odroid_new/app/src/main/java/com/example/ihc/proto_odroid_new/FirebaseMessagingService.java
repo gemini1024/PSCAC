@@ -209,7 +209,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
 
         //알림을 눌렀을 때 MainActivity로 전달될 데이터 intent에 넣어주기!
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, AlarmDetailActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addCategory("noti");
         intent.putExtra("alert", warning.getMessage());
