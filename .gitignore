@@ -73,9 +73,10 @@ captures/
 
 # Intellij
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/libraries
+code/android/proto_odroid_new/.idea/workspace.xml
+code/android/proto_odroid_new/.idea/tasks.xml
+code/android/proto_odroid_new/.idea/libraries
+code/android/proto_odroid_new/.idea/misc.xml
 
 # Keystore files
 *.jks
