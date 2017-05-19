@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,10 +52,9 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDtw91xZVpI5yktNn2hWmiosziyFES1rlc" />
+            android:value="AIzaSyBybudInt6teU6vHcNzXUwcQTvfjnFudlQ"/>
 
     </application>
 
