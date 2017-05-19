@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -36,8 +35,6 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     //최소 알람거리. 경보가 발생한 위치과 현재 디바이스의 위치사이의 거리가 '최소 알람거리' 이내라면 경보한다.
     private static final double ALERT_DISTANCE = 200;
     private AlertInfo warning = new AlertInfo();
-    private LocationManager locationManager;
-
     /**
      * fcm서버로부터 메세지가 도착하면 호출되는 메소드
      * onMessageReceived 메소드는 앱이 포그라운드에 있을때만 작동한다.
@@ -49,7 +46,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-        Log.d("메세지호출","콜");
+        Log.d("onMessageReceived","call");
 
         //받은 메세지에서 위도,경도,위험경보 데이터를 가져온다.
         Map<String,String> msgData = remoteMessage.getData();
@@ -57,23 +54,25 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //서버로 받은 데이터 중 누락된게 있는지 확인.
         //누락되었다면 뒷 작업 들어가지 않고 종료
         if(checkMissedData(msgData))  return;
+
+        //AlertInfo객체(warning)에 데이터 set
         insertTargInfo(msgData);
 
         //정보로 조건을 체크하고 경보하기
         checkAndAlert(warning);
 
-        Log.d("체크앤알럴트 종료","마지막로직");
     }
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("onCreate","call");
         //디바이스 현재위치 불러오기
         getGps();
-
     }
 
     //fcm서버로받은 메세지에서 보드의 위도,경도 등의 정보를 warning객체에 채워준다.
     private void insertTargInfo(Map<String,String> msgData){
+        Log.d("insertTargInfo","call");
         //위도,경도,위험메세지를 담는 AlertInfo객체를 만들고 데이터를 넣는다.
         warning.setTarg_latitude(Double.parseDouble(msgData.get("latitude")));
         warning.setTarg_longitude(Double.parseDouble(msgData.get("longitude")));
@@ -86,27 +85,13 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     }
     //현재 디바이스의 위치를 가져와서 warning객체에 채워준다.
     private void getGps(){
-        /**
-         * 디바이스 위치와 경보발생 보드 간 거리계산
-         */
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Log.d("getGps","call");
 
-        if(new GpsInfo(getApplicationContext()).checkPermission()) {
-            Log.d("퍼미션쳌", "퍼미션쳌");
-            List<String> providers = locationManager.getProviders(true);
-            Location bestLocation = null;
-            for (String provider : providers) {
-                Location loc = locationManager.getLastKnownLocation(provider);
-                if( loc == null ) continue;
-                if( bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy() ) {
-                    bestLocation = loc;
-                }
-            }
-            warning.setDev_latitude(bestLocation.getLatitude());
-            warning.setDev_longitude(bestLocation.getLongitude());
-            Log.d("현재 latitude", String.valueOf(bestLocation.getLatitude()));
-            Log.d("현재 longitude", String.valueOf(bestLocation.getLongitude()) );
-        }
+        Location devLocation = new GpsInfo(getApplicationContext()).getLocationInService();
+        warning.setDev_latitude(devLocation.getLatitude());
+        warning.setDev_longitude(devLocation.getLongitude());
+        Log.d("현재 latitude", String.valueOf(devLocation.getLatitude()));
+        Log.d("현재 longitude", String.valueOf(devLocation.getLongitude()) );
     }
 
 
@@ -185,27 +170,25 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
      * @return
      */
     private AlertInfo checkAndAlert(AlertInfo warning) {
-        Log.d("쳌알러트호출","쳌알러트호출");
+        Log.d("checkAndAlert","call");
 
         //객체가 null이면 null 반환
         if (warning == null)
             return null;
-        Log.d("쳌알럹ㅌ널체크","널쳌");
 
         //위치(위도,경도) 정보가 없을때 null 반환
         if (String.valueOf(warning.getTarg_latitude()).equals("") || String.valueOf(warning.getTarg_longitude()).equals(""))
             return null;
-        Log.d("데이터쳌","데이터쳌");
+        Log.d("checkAndAlert","dataCheck");
 
         //거리계산
         //두 디바이스 간 거리가 설정범위보다 멀리 떨어져 있으면 알람하지 않는다.
         double distance = getDistance(warning.getTarg_latitude(), warning.getTarg_longitude(), warning.getDev_latitude(), warning.getDev_longitude(), "meter");
-        Log.d("보드위치: ",String.valueOf(warning.getTarg_latitude())+ String.valueOf(warning.getTarg_longitude()));
-        Log.d("현재위치: ",String.valueOf(warning.getDev_latitude())+String.valueOf(warning.getDev_longitude()));
-        Log.d("사이거리",String.valueOf(distance));
+        Log.d("checkAndAlert ","보드위치: " + String.valueOf(warning.getTarg_latitude())+ String.valueOf(warning.getTarg_longitude()));
+        Log.d("checkAndAlert ","현재위치: " + String.valueOf(warning.getDev_latitude())+String.valueOf(warning.getDev_longitude()));
+        Log.d("checkAndAlert ","사이거리: " + String.valueOf(distance));
         if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
 
-        Log.d("거리검사후","거리검사후");
 
 
         //알림을 눌렀을 때 MainActivity로 전달될 데이터 intent에 넣어주기!
@@ -251,6 +234,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
      * @param notificationBuilder 알림설정객체
      * */
     void setMsgNSound(AlertInfo warning, NotificationCompat.Builder notificationBuilder){
+        Log.d("setMsgNSound ","call");
+
         //경보가 디폴트일때, 디폴트경보발생(푸시알림 및 소리)
         //경보종류 다양해 질 경우 if문으로 추가
         if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous")) {
@@ -276,6 +261,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
      * @return
      */
     private static double getDistance(double lat1, double lon1, double lat2, double lon2, String unit) {
+        Log.d("getDistance ","call");
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
 
@@ -303,7 +289,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("서비스종료!!!!","서비스종료!!!");
+        Log.d("FirebaseMessagingSvc","onDestroty call");
     }
 
 
