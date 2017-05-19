@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,6 +72,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 //        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        //퍼미션체크
+        new GpsInfo().requestPermission(this);
+
+        //fcm푸시메세지 topic설정. 서버에서 전체 어플사용자로 전송할 때, 내부적으로 이 설정값에 따라 받을지 말지 결정(추측)
+        FirebaseMessaging.getInstance().subscribeToTopic("alert");
 
         polylines = new ArrayList<>();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -103,23 +109,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 double latitude = 37.339898;
                 double longitude = 126.734769;
 
-                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-                if(ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                        || ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(LOG_TAG, "현재위치 불러오기");
-                    List<String> providers = locationManager.getProviders(true);
-                    Location bestLocation = null;
-                    for (String provider : providers) {
-                        Location loc = locationManager.getLastKnownLocation(provider);
-                        if( loc == null ) continue;
-                        if( bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy() ) {
-                            bestLocation = loc;
-                        }
-                    }
-                    Log.d("현재 latitude", String.valueOf(bestLocation.getLatitude()));
-                    Log.d("현재 longitude", String.valueOf(bestLocation.getLongitude()) );
-                    latitude = bestLocation.getLatitude();
-                    longitude = bestLocation.getLongitude();
+                if(new GpsInfo(getApplicationContext()).checkPermission()) {
+                    Location location = new GpsInfo(getApplicationContext()).getLocationInService();
+                    Log.d("현재 latitude", String.valueOf(location.getLatitude()));
+                    Log.d("현재 longitude", String.valueOf(location.getLongitude()) );
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
                     Log.d(LOG_TAG, "현재위치 불러오기 완료");
                 }
 

@@ -1,6 +1,5 @@
 package com.example.ihc.proto_odroid_new;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
@@ -48,16 +47,30 @@ public class GpsInfo extends Service implements LocationListener {
     */
     public boolean checkPermission(){
         Log.d("checkPermission","call");
-        if(mContext == null)    return false;
+        if(mContext == null){
+            Log.d("checkPermission ","context null");
+            return false;
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
-                //권한이 있다면
-                return true;
+            if(mContext.getApplicationInfo().targetSdkVersion  >= Build.VERSION_CODES.M){
+                Log.d("checkPermission ","version check");
+                if (ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        && ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+                    //권한이 있다면
+                    Log.d("checkPermission ","permision true");
+                    return true;
+                }
+            }else{
+                if (ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        && ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+                    //권한이 있다면
+                    Log.d("checkPermission ","permision true");
+                    return true;
+                }
             }
         }
+
         return false;
     }
 
@@ -85,6 +98,7 @@ public class GpsInfo extends Service implements LocationListener {
         Location bestLocation = null;
 
         if(checkPermission()) {
+            Log.d("getLocationInService ","call");
             List<String> providers = locationManager.getProviders(true);
             for (String provider : providers) {
                 Location loc = locationManager.getLastKnownLocation(provider);

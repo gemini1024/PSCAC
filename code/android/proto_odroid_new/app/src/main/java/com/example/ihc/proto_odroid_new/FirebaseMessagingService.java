@@ -35,6 +35,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     //최소 알람거리. 경보가 발생한 위치과 현재 디바이스의 위치사이의 거리가 '최소 알람거리' 이내라면 경보한다.
     private static final double ALERT_DISTANCE = 200;
     private AlertInfo warning = new AlertInfo();
+
     /**
      * fcm서버로부터 메세지가 도착하면 호출되는 메소드
      * onMessageReceived 메소드는 앱이 포그라운드에 있을때만 작동한다.
@@ -60,12 +61,11 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //정보로 조건을 체크하고 경보하기
         checkAndAlert(warning);
-
     }
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("onCreate","call");
+        Log.d("메세지서비스","call");
         //디바이스 현재위치 불러오기
         getGps();
     }
