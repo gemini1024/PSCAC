@@ -18,6 +18,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import java.util.List;
+
 /**
  * Created by ihc on 2017-03-19.
  */
@@ -59,6 +61,7 @@ public class GpsInfo extends Service implements LocationListener {
     * 권한설정이 되어있다면 true, 아니면 false반환
     */
     public boolean checkPermission(){
+        Log.d("checkPermission","call");
         if(mContext == null)    return false;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -92,113 +95,20 @@ public class GpsInfo extends Service implements LocationListener {
     }
 
     public Location getLocationInService(){
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location bestLocation = null;
 
-        try {
-            Log.d("겟로케이션인서비스","호출");
-            locationManager = (LocationManager) mContext
-                    .getSystemService(LOCATION_SERVICE);
-
-            // GPS 정보 가져오기
-            isGPSEnabled = locationManager
-                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
-            Log.d("지피에스가능",String.valueOf(isGPSEnabled));
-
-            // 현재 네트워크 상태 값 알아오기
-            isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            Log.d("네트워크가능",String.valueOf(isNetworkEnabled));
-
-            if (!isGPSEnabled && !isNetworkEnabled) {
-                // GPS 와 네트워크사용이 가능하지 않을때 소스 구현
-                Log.d("지피에스,네트워크사용","불가능");
-            } else {
-                Log.d("지피에스,네트워크사용","가능");
-                this.isGetLocation = true;
-                // 네트워크 정보로 부터 위치값 가져오기
-                if (isNetworkEnabled) {
-                    Log.d("네트워크확인","네트워크확인");
-
-                    //권한체크
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (ContextCompat.checkSelfPermission(mContext,android.Manifest.permission.ACCESS_FINE_LOCATION)
-                                != PackageManager.PERMISSION_GRANTED) {
-                            Log.d("권한 없다","권한없다");
-                        }else{
-                            Log.d("위치가져오기","위치가져오기");
-                            locationManager.requestLocationUpdates(
-                                    LocationManager.NETWORK_PROVIDER,
-                                    MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                            if (locationManager != null) {
-                                location = locationManager
-                                        .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                                if (location != null) {
-                                    // 위도 경도 저장
-                                    lat = location.getLatitude();
-                                    lon = location.getLongitude();
-                                }
-                            }
-                            if (isGPSEnabled) {
-                                if (location == null) {
-                                    locationManager.requestLocationUpdates(
-                                            LocationManager.GPS_PROVIDER,
-                                            MIN_TIME_BW_UPDATES,
-                                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                                    if (locationManager != null) {
-                                        location = locationManager
-                                                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                                        if (location != null) {
-                                            lat = location.getLatitude();
-                                            lon = location.getLongitude();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }else{
-                        //안드로이드 6.0이하버젼일때
-                        Log.d("위치가져오기","위치가져오기");
-                        locationManager.requestLocationUpdates(
-                                LocationManager.NETWORK_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                            if (location != null) {
-                                // 위도 경도 저장
-                                lat = location.getLatitude();
-                                lon = location.getLongitude();
-                            }
-                        }
-                        if (isGPSEnabled) {
-                            if (location == null) {
-                                locationManager.requestLocationUpdates(
-                                        LocationManager.GPS_PROVIDER,
-                                        MIN_TIME_BW_UPDATES,
-                                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                                if (locationManager != null) {
-                                    location = locationManager
-                                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                                    if (location != null) {
-                                        lat = location.getLatitude();
-                                        lon = location.getLongitude();
-                                    }
-                                }
-                            }
-                        }
-                    }
+        if(new GpsInfo(getApplicationContext()).checkPermission()) {
+            List<String> providers = locationManager.getProviders(true);
+            for (String provider : providers) {
+                Location loc = locationManager.getLastKnownLocation(provider);
+                if (loc == null) continue;
+                if (bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy()) {
+                    bestLocation = loc;
                 }
-
-
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        if(location == null)
-            Log.d("로케이션","널");
-        return location;
+        return bestLocation;
     }
 
 
