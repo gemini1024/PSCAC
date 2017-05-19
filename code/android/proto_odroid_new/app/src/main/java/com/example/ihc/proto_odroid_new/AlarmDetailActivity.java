@@ -2,7 +2,6 @@ package com.example.ihc.proto_odroid_new;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -98,43 +97,43 @@ public class AlarmDetailActivity extends FragmentActivity implements OnMapReadyC
         }
 
 
-        //알림을 통하지 않고 어플을 켰을때,
-        Location mLocation = new GpsInfo(this).getLocationInService();
-        if(mLocation != null){
-            //현재 디바이스 위치가 제대로 받아와졌을때 호출됨
-
-            //마커옵션에 경보발생구역, 현재위치 설정
-            MarkerOptions curOpt = new MarkerOptions();
-            curOpt.position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
-
-            //현재위치 마커에 표시할 타이틀 입력
-            curOpt.title("내 위치");
-            //현재위치 아이콘 설정
-            curOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("icon_car",(int)width/8,(int)height/24)));
-            //지도에 현재위치 마커 추가 및 표시
-            googleMap.addMarker(curOpt).showInfoWindow();
-            //카메라 중심 좌표 설정( 현재위치로)
-            builder.target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
-            //해당 설정값을 지도에 적용
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
-            googleMap.moveCamera(cameraUpdate);
-        }
-        else {
-            //현재 디바이스 위치가 제대로 받아지지 않았을때, 디폴트 설정으로 지도에 마커를 표시한다.
-            Log.d("normal온맵레디","로케이션 없을때");
-            //마커옵션에 경보발생구역, 현재위치 설정
-            MarkerOptions curOpt = new MarkerOptions();
-            curOpt.position(startingPoint);
-            //현재위치 마커에 표시할 타이틀 입력
-            curOpt.title("기준위치!");
-            //지도에 현재위치 마커 추가 및 표시
-            googleMap.addMarker(curOpt).showInfoWindow();
-            //카메라 중심 좌표 설정( 현재위치로)
-            builder.target(startingPoint);
-            //해당 설정값을 지도에 적용
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
-            googleMap.moveCamera(cameraUpdate);
-        }
+//        //알림을 통하지 않고 어플을 켰을때,
+//        Location mLocation = new GpsInfo(this).getLocationInService();
+//        if(mLocation != null){
+//            //현재 디바이스 위치가 제대로 받아와졌을때 호출됨
+//
+//            //마커옵션에 경보발생구역, 현재위치 설정
+//            MarkerOptions curOpt = new MarkerOptions();
+//            curOpt.position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+//
+//            //현재위치 마커에 표시할 타이틀 입력
+//            curOpt.title("내 위치");
+//            //현재위치 아이콘 설정
+//            curOpt.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("icon_car",(int)width/8,(int)height/24)));
+//            //지도에 현재위치 마커 추가 및 표시
+//            googleMap.addMarker(curOpt).showInfoWindow();
+//            //카메라 중심 좌표 설정( 현재위치로)
+//            builder.target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+//            //해당 설정값을 지도에 적용
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+//            googleMap.moveCamera(cameraUpdate);
+//        }
+//        else {
+//            //현재 디바이스 위치가 제대로 받아지지 않았을때, 디폴트 설정으로 지도에 마커를 표시한다.
+//            Log.d("normal온맵레디","로케이션 없을때");
+//            //마커옵션에 경보발생구역, 현재위치 설정
+//            MarkerOptions curOpt = new MarkerOptions();
+//            curOpt.position(startingPoint);
+//            //현재위치 마커에 표시할 타이틀 입력
+//            curOpt.title("기준위치!");
+//            //지도에 현재위치 마커 추가 및 표시
+//            googleMap.addMarker(curOpt).showInfoWindow();
+//            //카메라 중심 좌표 설정( 현재위치로)
+//            builder.target(startingPoint);
+//            //해당 설정값을 지도에 적용
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+//            googleMap.moveCamera(cameraUpdate);
+//        }
 
 
     }
