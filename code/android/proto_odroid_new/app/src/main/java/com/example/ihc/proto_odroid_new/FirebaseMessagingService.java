@@ -61,7 +61,6 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //정보로 조건을 체크하고 경보하기
         checkAndAlert(warning);
 
-        Log.d("체크앤알럴트 종료","마지막로직");
     }
     @Override
     public void onCreate() {
@@ -187,7 +186,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         double distance = getDistance(warning.getTarg_latitude(), warning.getTarg_longitude(), warning.getDev_latitude(), warning.getDev_longitude(), "meter");
         Log.d("checkAndAlert ","보드위치: " + String.valueOf(warning.getTarg_latitude())+ String.valueOf(warning.getTarg_longitude()));
         Log.d("checkAndAlert ","현재위치: " + String.valueOf(warning.getDev_latitude())+String.valueOf(warning.getDev_longitude()));
-        Log.d("checkAndAlert ","사이거리" + String.valueOf(distance));
+        Log.d("checkAndAlert ","사이거리: " + String.valueOf(distance));
         if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
 
 

@@ -25,7 +25,6 @@ import java.util.List;
  */
 public class GpsInfo extends Service implements LocationListener {
 
-    private Activity act;
     private Context mContext;
 
     // 현재 GPS 사용유무
@@ -33,19 +32,6 @@ public class GpsInfo extends Service implements LocationListener {
 
     // 네트워크 사용유무
     boolean isNetworkEnabled = false;
-
-    // GPS 상태값
-    boolean isGetLocation = false;
-
-    Location location;
-    double lat; // 위도
-    double lon; // 경도
-
-    // 최소 GPS 정보 업데이트 거리 10미터
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
-
-    // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
 
     protected LocationManager locationManager;
 
@@ -95,10 +81,10 @@ public class GpsInfo extends Service implements LocationListener {
     }
 
     public Location getLocationInService(){
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationManager = (LocationManager)mContext.getSystemService(LOCATION_SERVICE);
         Location bestLocation = null;
 
-        if(new GpsInfo(getApplicationContext()).checkPermission()) {
+        if(checkPermission()) {
             List<String> providers = locationManager.getProviders(true);
             for (String provider : providers) {
                 Location loc = locationManager.getLastKnownLocation(provider);
@@ -111,24 +97,6 @@ public class GpsInfo extends Service implements LocationListener {
         return bestLocation;
     }
 
-
-    /**
-     * GPS 종료
-     * */
-//    public void stopUsingGpsInService(){
-//        if(mContext == null)    return;
-//        if(locationManager != null){
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                if (ContextCompat.checkSelfPermission(mContext,android.Manifest.permission.ACCESS_FINE_LOCATION)
-//                        != PackageManager.PERMISSION_GRANTED) {
-//                    //현재 ACCESS_FIND_LOCATION 권한 획득되어있는지 체크. 만약 획득이 되지 않았다면 진입
-//                }else {
-//                    Log.d("지피에스서비스중지","중지");
-//                    locationManager.removeUpdates(GpsInfo.this);
-//                }
-//            }
-//        }
-//    }
 
 
     /**
