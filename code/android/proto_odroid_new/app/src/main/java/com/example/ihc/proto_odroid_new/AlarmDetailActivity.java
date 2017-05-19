@@ -28,10 +28,7 @@ public class AlarmDetailActivity extends FragmentActivity implements OnMapReadyC
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-
-
+        setContentView(R.layout.activity_alarm_detail);
 
         //구글맵준비
         gmapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map);

@@ -41,9 +41,10 @@ public class GpsInfo extends Service implements LocationListener {
 
     }
 
-    /*
+    /**
     * 단순 권한체크
     * 권한설정이 되어있다면 true, 아니면 false반환
+     * 첫 실행 시 권한거부했을때 예외처리 해아함.
     */
     public boolean checkPermission(){
         Log.d("checkPermission","call");

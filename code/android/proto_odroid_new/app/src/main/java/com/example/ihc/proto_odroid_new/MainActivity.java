@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 //        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         //퍼미션체크
         new GpsInfo().requestPermission(this);
 
@@ -184,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         else {
             progressDialog = ProgressDialog.show(this, "Please wait.",
                     "Fetching route information.", true);
-            GoogleDirection.withServerKey("AIzaSyBybudInt6teU6vHcNzXUwcQTvfjnFudlQ")
+            GoogleDirection.withServerKey("AIzaSyADCnhnBxpgCRP3nqWZh_1XwjPyJ37ByBo")
                     .from(start)
                     .to(end)
                     .execute(new DirectionCallback() {

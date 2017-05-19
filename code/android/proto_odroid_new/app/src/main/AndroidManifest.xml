@@ -53,7 +53,7 @@
         </receiver>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBybudInt6teU6vHcNzXUwcQTvfjnFudlQ"/>
+            android:value="AIzaSyADCnhnBxpgCRP3nqWZh_1XwjPyJ37ByBo"/>
     </application>
 
 </manifest>
