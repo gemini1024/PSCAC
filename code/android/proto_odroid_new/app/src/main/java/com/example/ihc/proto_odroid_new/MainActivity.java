@@ -1,7 +1,6 @@
 package com.example.ihc.proto_odroid_new;
 
 import android.app.ProgressDialog;
-import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -10,7 +9,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.AutoCompleteTextView;
@@ -19,7 +17,9 @@ import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
 import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.Language;
 import com.akexorcist.googledirection.constant.RequestResult;
+import com.akexorcist.googledirection.constant.TransportMode;
 import com.akexorcist.googledirection.model.Direction;
 import com.akexorcist.googledirection.model.Leg;
 import com.akexorcist.googledirection.model.Route;
@@ -33,6 +33,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -119,31 +120,39 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.d(LOG_TAG, "현재위치 불러오기 완료");
                 }
 
-                CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude));
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
 
-                map.moveCamera(center);
-                map.animateCamera(zoom);
+
+                //지도셋팅값( 기본값 )
+                CameraPosition.Builder builder = new CameraPosition.Builder()
+                        .zoom(16)
+                        .tilt(50)
+                        .target(new LatLng(latitude, longitude));
+
+                //마커옵션에 경보발생구역, 현재위치 설정
+                MarkerOptions curOpt = new MarkerOptions()
+                        .position(new LatLng(latitude, longitude))
+                        .title("현재 위치")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car));
+                //지도에 현재위치 마커 추가 및 표시
+                map.addMarker(curOpt).showInfoWindow();
+
+
+                //해당 설정값을 지도에 적용
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+                map.moveCamera(cameraUpdate);
                 Log.d(LOG_TAG, "맵 준비 완료");
+
+
             }
         });
 
 
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        if(new GpsInfo(getApplicationContext()).checkPermission()) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
     }
 
     @OnClick(R.id.send)
@@ -188,6 +197,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             GoogleDirection.withServerKey("AIzaSyADCnhnBxpgCRP3nqWZh_1XwjPyJ37ByBo")
                     .from(start)
                     .to(end)
+//                    .transportMode(TransportMode.DRIVING) // 운전용은 구글에서 지원이 잘 안됨.
+                    .transportMode(TransportMode.TRANSIT)
+                    .language(Language.KOREAN)
                     .execute(new DirectionCallback() {
                         @Override
                         public void onDirectionSuccess(Direction direction, String rawBody) {
