@@ -1,7 +1,6 @@
 package com.example.ihc.proto_odroid_new;
 
 import android.app.ProgressDialog;
-import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -10,7 +9,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.AutoCompleteTextView;
@@ -19,7 +17,9 @@ import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
 import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.Language;
 import com.akexorcist.googledirection.constant.RequestResult;
+import com.akexorcist.googledirection.constant.TransportMode;
 import com.akexorcist.googledirection.model.Direction;
 import com.akexorcist.googledirection.model.Leg;
 import com.akexorcist.googledirection.model.Route;
@@ -33,6 +33,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -47,49 +48,71 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, LocationListener {
-    protected GoogleMap map;
-    protected LatLng start;
-    protected LatLng end;
+public class MainActivity extends AppCompatActivity implements LocationListener {
+    // DEFAULT DATA
+    private static final String LOG_TAG = "MainActivity";
+    private final int DEFAULT_ZOOM_LEVEL = 18, DEFAULT_TILT = 50;
+    private double mLatitude = 37.339898, mLongitude = 126.734769;
+
+    // map & LatLng
+    private GoogleMap map;
+    private LatLng start;
+    private LatLng end;
+
+    // Views
     @BindView(R.id.start)
     AutoCompleteTextView starting;
     @BindView(R.id.destination)
     AutoCompleteTextView destination;
     @BindView(R.id.send)
     ImageView send;
-    private static final String LOG_TAG = "MainActivity";
-    protected GoogleApiClient mGoogleApiClient;
+
+    // draw direction
+    private GoogleApiClient mGoogleApiClient;
     private ProgressDialog progressDialog;
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[]{R.color.primary_dark, R.color.primary, R.color.primary_light, R.color.accent, R.color.primary_dark_material_light};
 
-    /**
-     * This activity loads a map and then displays the route and pushpins on it.
-     */
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-//        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         //퍼미션체크
         new GpsInfo().requestPermission(this);
-
         //fcm푸시메세지 topic설정. 서버에서 전체 어플사용자로 전송할 때, 내부적으로 이 설정값에 따라 받을지 말지 결정(추측)
         FirebaseMessaging.getInstance().subscribeToTopic("alert");
 
+        // 경로 그리기위한 설정
         polylines = new ArrayList<>();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Places.GEO_DATA_API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+                    }
+                })
                 .build();
         MapsInitializer.initialize(this);
         mGoogleApiClient.connect();
 
+        // map fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-
         if (mapFragment == null) {
             mapFragment = SupportMapFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
@@ -97,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                Log.d(LOG_TAG, "맵 불러오기");
+                Log.d(LOG_TAG, "Start Map Async");
 //                googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
                 googleMap.setTrafficEnabled(true);
                 googleMap.setIndoorEnabled(true);
@@ -105,45 +128,44 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
                 map = googleMap;
 
-
-                Log.d(LOG_TAG, "맵 이동");
-                double latitude = 37.339898;
-                double longitude = 126.734769;
-
                 if(new GpsInfo(getApplicationContext()).checkPermission()) {
                     Location location = new GpsInfo(getApplicationContext()).getLocationInService();
                     Log.d("현재 latitude", String.valueOf(location.getLatitude()));
                     Log.d("현재 longitude", String.valueOf(location.getLongitude()) );
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
+                    mLatitude = location.getLatitude();
+                    mLongitude = location.getLongitude();
                     Log.d(LOG_TAG, "현재위치 불러오기 완료");
                 }
 
-                CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude));
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
+                LatLng latLng = new LatLng(mLatitude, mLongitude);
 
-                map.moveCamera(center);
-                map.animateCamera(zoom);
-                Log.d(LOG_TAG, "맵 준비 완료");
+                //지도셋팅값( 기본값 )
+                CameraPosition.Builder builder = new CameraPosition.Builder()
+                        .zoom(DEFAULT_ZOOM_LEVEL)
+                        .tilt(DEFAULT_TILT)
+                        .target(latLng);
+                //해당 설정값을 지도에 적용
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
+                map.moveCamera(cameraUpdate);
+
+                //현재위치 설정
+                MarkerOptions curOpt = new MarkerOptions()
+                        .position(latLng)
+                        .title("현재 위치")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car));
+                //지도에 현재위치 마커 추가 및 표시
+                map.addMarker(curOpt).showInfoWindow();
+                Log.d(LOG_TAG, "End Map Async");
             }
         });
 
 
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        if(new GpsInfo(getApplicationContext()).checkPermission()) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
     }
 
     @OnClick(R.id.send)
@@ -152,10 +174,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(CheckOnline.isOnline(this)) {
             start = getLocationFromAddress(starting.getText().toString());
             end = getLocationFromAddress(destination.getText().toString());
-            route();
+
+            if(start == null) starting.setError("출발지를 찾을 수 없습니다");
+            else if(end == null) destination.setError("목적지를 찾을 수 없습니다");
+            else searchRoute();
         }
         else {
-            Toast.makeText(this,"No internet connectivity",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"인터넷 연결 상태를 확인해주세요.",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -166,10 +191,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         LatLng latLng = null;
         try {
             addresses = geocoder.getFromLocationName(strAddress, 1);
-            if(addresses.size() > 0)
+            if(addresses.size() > 0) {
                 latLng = new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
-            Log.d("길찾기-위도", String.valueOf(addresses.get(0).getLatitude()));
-            Log.d("길찾기-경도", String.valueOf(addresses.get(0).getLongitude()));
+                Log.d("길찾기-위도", String.valueOf(addresses.get(0).getLatitude()));
+                Log.d("길찾기-경도", String.valueOf(addresses.get(0).getLongitude()));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -177,68 +203,45 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-    public void route() {
-        if(start==null)
-            starting.setError("출발지를 찾을 수 없습니다");
-        else if(end==null)
-            destination.setError("목적지를 찾을 수 없습니다");
-        else {
-            progressDialog = ProgressDialog.show(this, "Please wait.",
+    public void searchRoute() {
+        progressDialog = ProgressDialog.show(this, "Please wait.",
                     "Fetching route information.", true);
-            GoogleDirection.withServerKey("AIzaSyADCnhnBxpgCRP3nqWZh_1XwjPyJ37ByBo")
-                    .from(start)
-                    .to(end)
-                    .execute(new DirectionCallback() {
-                        @Override
-                        public void onDirectionSuccess(Direction direction, String rawBody) {
-                            progressDialog.dismiss();
-                            CameraUpdate center = CameraUpdateFactory.newLatLng(start);
-                            map.moveCamera(center);
+        GoogleDirection.withServerKey("AIzaSyADCnhnBxpgCRP3nqWZh_1XwjPyJ37ByBo")
+                .from(start)
+                .to(end)
+//                    .transportMode(TransportMode.DRIVING) // 운전용은 구글에서 지원이 잘 안됨.
+                .transportMode(TransportMode.TRANSIT)
+                .language(Language.KOREAN)
+                .execute(new DirectionCallback() {
+                    @Override
+                    public void onDirectionSuccess(Direction direction, String rawBody) {
+                        progressDialog.dismiss();
+                        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
+                        map.moveCamera(center);
 
-                            if(direction.isOK()) {
-                                onRoutingSuccess(direction.getRouteList());
-                            } else {
-                                String resultStatus = direction.getStatus();
-                                if( resultStatus.equals(RequestResult.NOT_FOUND) )
-                                    Toast.makeText(getApplicationContext(),"NOT_FOUND",Toast.LENGTH_SHORT).show();
-                                else if( resultStatus.equals(RequestResult.ZERO_RESULTS) )
-                                    Toast.makeText(getApplicationContext(),"ZERO_RESULTS",Toast.LENGTH_SHORT).show();
-                                else if( resultStatus.equals(RequestResult.MAX_WAYPOINTS_EXCEEDED) )
-                                    Toast.makeText(getApplicationContext(),"MAX_WAYPOINTS_EXCEEDED",Toast.LENGTH_SHORT).show();
-                                else if( resultStatus.equals(RequestResult.INVALID_REQUEST) )
-                                    Toast.makeText(getApplicationContext(),"INVALID_REQUEST",Toast.LENGTH_SHORT).show();
-                                else if( resultStatus.equals(RequestResult.OVER_QUERY_LIMIT) )
-                                    Toast.makeText(getApplicationContext(),"OVER_QUERY_LIMIT",Toast.LENGTH_SHORT).show();
-                                else if( resultStatus.equals(RequestResult.REQUEST_DENIED) )
-                                    Toast.makeText(getApplicationContext(),"REQUEST_DENIED",Toast.LENGTH_SHORT).show();
-                                else if( resultStatus.equals(RequestResult.UNKNOWN_ERROR) )
-                                    Toast.makeText(getApplicationContext(),"UNKNOWN_ERROR",Toast.LENGTH_SHORT).show();
-                                else
-                                    Toast.makeText(getApplicationContext(),"Not OK",Toast.LENGTH_SHORT).show();
-                            }
+                        if(direction.isOK()) {
+                            onRoutingSuccess(direction.getRouteList());
+                        } else {
+                            onRoutingFailure(direction.getStatus());
                         }
+                    }
 
-                        @Override
-                        public void onDirectionFailure(Throwable t) {
-                            Toast.makeText(getApplicationContext(),"Direction Failure",Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        }
+                    @Override
+                    public void onDirectionFailure(Throwable t) {
+                        Toast.makeText(getApplicationContext(),"경로찾기 실패",Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
-    public void onRoutingSuccess(List<Route> route) {
-
-        if(polylines.size()>0) {
-            for (Polyline poly : polylines) {
+    private void onRoutingSuccess(List<Route> route) {
+        if(polylines.size()>0)
+            for (Polyline poly : polylines)
                 poly.remove();
-            }
-        }
 
         polylines = new ArrayList<>();
         //add route(s) to the map.
         for (int i = 0; i <route.size(); i++) {
-
             //In case of more than 5 alternative routes
             int colorIndex = i % COLORS.length;
             Leg leg = route.get(i).getLegList().get(0);
@@ -249,8 +252,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             polyOptions.addAll(leg.getDirectionPoint());
             Polyline polyline = map.addPolyline(polyOptions);
             polylines.add(polyline);
-
-            Toast.makeText(getApplicationContext(),route.get(i).getSummary(),Toast.LENGTH_SHORT).show();
         }
 
         // Start marker
@@ -264,32 +265,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         options.position(end);
         options.icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green));
         map.addMarker(options);
+    }
+
+
+    private void onRoutingFailure(String resultStatus) {
+        // 에러 종류 출력
+        if( resultStatus.equals(RequestResult.NOT_FOUND) )
+            Toast.makeText(getApplicationContext(),"NOT_FOUND",Toast.LENGTH_SHORT).show();
+        else if( resultStatus.equals(RequestResult.ZERO_RESULTS) )
+            Toast.makeText(getApplicationContext(),"ZERO_RESULTS",Toast.LENGTH_SHORT).show();
+        else if( resultStatus.equals(RequestResult.MAX_WAYPOINTS_EXCEEDED) )
+            Toast.makeText(getApplicationContext(),"MAX_WAYPOINTS_EXCEEDED",Toast.LENGTH_SHORT).show();
+        else if( resultStatus.equals(RequestResult.INVALID_REQUEST) )
+            Toast.makeText(getApplicationContext(),"INVALID_REQUEST",Toast.LENGTH_SHORT).show();
+        else if( resultStatus.equals(RequestResult.OVER_QUERY_LIMIT) )
+            Toast.makeText(getApplicationContext(),"OVER_QUERY_LIMIT",Toast.LENGTH_SHORT).show();
+        else if( resultStatus.equals(RequestResult.REQUEST_DENIED) )
+            Toast.makeText(getApplicationContext(),"REQUEST_DENIED",Toast.LENGTH_SHORT).show();
+        else if( resultStatus.equals(RequestResult.UNKNOWN_ERROR) )
+            Toast.makeText(getApplicationContext(),"UNKNOWN_ERROR",Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(getApplicationContext(),"Not OK",Toast.LENGTH_SHORT).show();
 
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 
     @Override
     public void onLocationChanged(Location location) {
         CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
-
         map.moveCamera(center);
-        map.animateCamera(zoom);
-
     }
 
     @Override
