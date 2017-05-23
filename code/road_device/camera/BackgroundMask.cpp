@@ -20,6 +20,8 @@ BackgroundMask::~BackgroundMask() {
 
 // Identify moving areas for a period of time.
 // The area without motion is erased.
+// param - vc : Access to import video from source
+// return : Finished mask
 UMat BackgroundMask::createBackgroundMask(VideoCapture& vc) {
     std::cout << "Recognizing the background ... " << std::endl;
     recognizeBackgournd(vc);
@@ -48,7 +50,7 @@ UMat BackgroundMask::loadBackgroundMask(void) {
     maskImg.copyTo(accumulatedMask);
     maskImg.release();
 
-    std::cout << "Learned BackgroundMask road Complete! " << std::endl;
+    std::cout << "Learned BackgroundMask load Complete! " << std::endl;
 
     return accumulatedMask;
 }
@@ -152,6 +154,8 @@ void BackgroundMask::setLearningRate(double rate) {
 
 
 // Only copy the foreground using the completed mask
+// param - src : Source video. before mask operation
+// param - dst : Space to store the result after mask operation
 void BackgroundMask::locateForeground(UMat& src, UMat& dst) {
     assert(!accumulatedMask.empty());
 

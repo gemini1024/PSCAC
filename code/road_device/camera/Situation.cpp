@@ -21,11 +21,6 @@ Situation::Situation(int imgRows, int imgCols, int delay) : delay(delay), sendDe
         std::cerr << "ERROR : Could not load signpost image" << std::endl;
         exit(1);
     }
-
-    // display FULLSCREEN
-    // namedWindow( CamDef::sign, CV_WND_PROP_FULLSCREEN );
-    // setWindowProperty( CamDef::sign, CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN );
-    imshow( CamDef::sign, safetyImg ); // init Signs
 }
 
 Situation::~Situation() {
@@ -42,12 +37,39 @@ const UMat& Situation::getRoadImg(void) {
 }
 
 
-// Draw a roadImg using objects of found cars
-void Situation::updateRoadImg(const std::vector<Rect>& foundVehicles) {
-    // Draw Red line under the vehicles
-    for ( auto const& r : foundVehicles ) {
-        line(roadImg, Point(r.tl().x, r.br().y), r.br(), Scalar(0,0,255), 1);
+// Accumulates a line at the bottom of the object of the recognized vehicle to recognize the roadway
+// param - vc : Access to import video from source
+// param - bgMask : Mask for removing background from source
+// param - car_Detector : Detector to recognize vehicle object
+// param - accumulateNumFrames : Number of frames to learn for car recognition
+void Situation::createRoadImg(VideoCapture& vc, BackgroundMask& bgMask, VehiclesDetector& car_Detector, unsigned int accumulateNumFrames) {
+    UMat img, fgimg;
+
+    std::cout << "Recognizing the Road image ..." << std::endl;
+    while( accumulateNumFrames-- ) {
+        // Put the captured image in img
+        vc >> img;
+        if (img.empty())  {
+            std::cerr << "ERROR : Unable to load frame" << std::endl;
+            break;
+        }
+        imshow( CamDef::originalVideo, img );
+
+        // Recognize vehicles in video
+        bgMask.locateForeground(img, fgimg);
+        car_Detector.detect(fgimg);
+
+        // Update the road image
+        std::vector<Rect> foundVehicles = car_Detector.getFoundObjects();
+        for ( auto const& r : foundVehicles )
+            line(roadImg, Point(r.tl().x, r.br().y), r.br(), Scalar(0,0,255), 1);
+        imshow( CamDef::roadImg, roadImg );
+        imshow( CamDef::resultVideo, fgimg );
+
+        if( CamDef::shouldStop() ) accumulateNumFrames = 0;
     }
+    trimeRoadImg();
+    std::cout << "Road image creation Complete!" << std::endl;
 }
 
 // Stabilize road images by removing impulses
@@ -63,8 +85,10 @@ void Situation::trimeRoadImg(void) {
 }
 
 
-// Load the road image previously created by the call to updateRoadImg()
+// Load the road image previously created by the call to createRoadImg()
 void Situation::loadRoadImg(void) {
+    std::cout << "Load learned Road Image ... " << std::endl;
+
     Mat learnedRoadImg = imread( CamDef::learnedRoadImg  );
     if ( learnedRoadImg.empty() ) {
         std::cerr << "ERROR : Unable to load learnedRoadImg" << std::endl;
@@ -72,10 +96,19 @@ void Situation::loadRoadImg(void) {
     }
     learnedRoadImg.copyTo(roadImg);
     learnedRoadImg.release();
+
+    std::cout << "Learned Road Image load Complete! " << std::endl;
+}
+
+void Situation::setSignToFullScreen(void) {
+    namedWindow( CamDef::sign, CV_WND_PROP_FULLSCREEN );
+    setWindowProperty( CamDef::sign, CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN );
 }
 
 
 // Predicts a dangerous situation and generates a corresponding signal
+// param - foundPedestrians : Location of pedestrian objects
+// param - isCarOnRoad : Variables for transmitting data to the server only when there is a vehicle on the road. Deliver it to setSituation()
 void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians, bool isCarOnRoad) {
 
     // TODO : Store the coordinates for a period of time and predict the risk situation.
@@ -95,7 +128,8 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
                     break;
                 // If it is not the current DANGER state, if the coordinates of both ends of the lower end of the object are roadImg, it is judged as CAUTION state
                 } else if( safeCnt < delay/2 && ( roadMat.at<Vec3b>( r.br() )[2] == 255
-                    || roadMat.at<Vec3b>( Point( r.br().x+100, r.br().y ))[2] == 255
+                    || roadMat.at<Vec3b>( Point( r.br().x+2*(r.br().x-r.tl().x), r.br().y ))[2] == 255
+                    || roadMat.at<Vec3b>( Point( r.br().x-2*(r.br().x-r.tl().x), r.br().y ))[2] == 255
                     || roadMat.at<Vec3b>(Point( r.tl().x, r.br().y ))[2] == 255 ) ) {
                     setSituation( CAUTION, isCarOnRoad );
                 }
@@ -112,6 +146,8 @@ void Situation::sendPredictedSituation(const std::vector<Rect>& foundPedestrians
 
 
 // Set the current status and send it to LCD
+// param - situation : The current road situation judged by sendPredictedSituation()
+// param - isCarOnRoad : Variables for transmitting data to the server only when there is a vehicle on the road
 void Situation::setSituation(int situation, bool isCarOnRoad) {
     switch(situation) {
         case SAFETY :
