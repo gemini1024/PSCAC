@@ -4,7 +4,7 @@ package com.example.ihc.proto_odroid_new;
  * Created by ihc on 2017-01-31.
  */
 public class AlertInfo {
-
+    private int id;
     private double dev_latitude;
     private double dev_longitude;
     //위도,경도,위험종류
@@ -20,6 +20,10 @@ public class AlertInfo {
         this.targ_latitude = latitude;
         this.targ_longitude = longitude;
         this.message = message;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getMessage() {
@@ -52,6 +56,11 @@ public class AlertInfo {
 
     public String getContent() {
         return content;
+    }
+
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setTarg_latitude(double latitude) {
