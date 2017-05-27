@@ -15,7 +15,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:elevation="100dp"
@@ -34,27 +34,14 @@
                 android:padding="20dp">
 
                 <AutoCompleteTextView
-                    android:id="@+id/start"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@android:color/transparent"
-                    android:hint="Choose a starting point..." />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginRight="50dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@android:color/holo_green_light" />
-
-                <AutoCompleteTextView
                     android:id="@+id/destination"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:hint="Choose a destination..." />
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:imeOptions="actionGo"
+                    android:hint="목적지를 입력해주세요" />
             </LinearLayout>
             <ImageView
                 android:id="@+id/send"

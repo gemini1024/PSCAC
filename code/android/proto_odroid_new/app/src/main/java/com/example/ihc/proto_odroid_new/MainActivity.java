@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -35,6 +36,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -47,6 +49,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnEditorAction;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
     // DEFAULT DATA
@@ -56,12 +59,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     // map & LatLng
     private GoogleMap map;
+    private Marker curMarker;
     private LatLng start;
     private LatLng end;
 
-    // Views
-    @BindView(R.id.start)
-    AutoCompleteTextView starting;
     @BindView(R.id.destination)
     AutoCompleteTextView destination;
     @BindView(R.id.send)
@@ -137,24 +138,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     Log.d(LOG_TAG, "현재위치 불러오기 완료");
                 }
 
-                LatLng latLng = new LatLng(mLatitude, mLongitude);
+                start = new LatLng(mLatitude, mLongitude);
 
                 //지도셋팅값( 기본값 )
                 CameraPosition.Builder builder = new CameraPosition.Builder()
                         .zoom(DEFAULT_ZOOM_LEVEL)
                         .tilt(DEFAULT_TILT)
-                        .target(latLng);
+                        .target(start);
                 //해당 설정값을 지도에 적용
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(builder.build());
                 map.moveCamera(cameraUpdate);
 
                 //현재위치 설정
                 MarkerOptions curOpt = new MarkerOptions()
-                        .position(latLng)
+                        .position(start)
                         .title("현재 위치")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car));
                 //지도에 현재위치 마커 추가 및 표시
-                map.addMarker(curOpt).showInfoWindow();
+                curMarker = map.addMarker(curOpt);
+                curMarker.showInfoWindow();
                 Log.d(LOG_TAG, "End Map Async");
             }
         });
@@ -168,21 +170,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
+
+    @OnEditorAction(R.id.destination)
+    protected boolean commitEditText(int actionId) {
+        if( actionId == EditorInfo.IME_ACTION_GO ) {
+            sendRequest();
+            return true;
+        }
+        return false;
+    }
+
+
     @OnClick(R.id.send)
-    public void sendRequest()
+    protected void sendRequest()
     {
         if(CheckOnline.isOnline(this)) {
-            start = getLocationFromAddress(starting.getText().toString());
             end = getLocationFromAddress(destination.getText().toString());
 
-            if(start == null) starting.setError("출발지를 찾을 수 없습니다");
-            else if(end == null) destination.setError("목적지를 찾을 수 없습니다");
+            if(end == null) destination.setError("목적지를 찾을 수 없습니다");
             else searchRoute();
         }
         else {
             Toast.makeText(this,"인터넷 연결 상태를 확인해주세요.",Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
     private LatLng getLocationFromAddress(String strAddress){
@@ -254,14 +266,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             polylines.add(polyline);
         }
 
-        // Start marker
-        MarkerOptions options = new MarkerOptions();
-        options.position(start);
-        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue));
-        map.addMarker(options);
-
         // End marker
-        options = new MarkerOptions();
+        MarkerOptions options = new MarkerOptions();
         options.position(end);
         options.icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green));
         map.addMarker(options);
@@ -292,8 +298,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
-        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
-        map.moveCamera(center);
+        start = new LatLng(location.getLatitude(), location.getLongitude());
+        map.moveCamera(CameraUpdateFactory.newLatLng(start));
+        curMarker.setPosition(start);
     }
 
     @Override
