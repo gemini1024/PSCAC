@@ -51,14 +51,13 @@ public class PSCACBean {
 	public boolean updateDB(PSCACVo vo) {
 		connect();
 
-		String sql = "update vo set id=?, gps=?, status=? where id=?";
+		String sql = "update vo set id=?, address=?,  where id=?";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, vo.getId());
-			pstmt.setString(2, vo.getGps());
-			pstmt.setString(3, vo.getStatus());
-
+			pstmt.setString(2, vo.getAddress());
+			
 			pstmt.executeUpdate();
 			System.out.print(vo.getId());
 
@@ -90,16 +89,16 @@ public class PSCACBean {
 		return true;
 	}
 
-	// 신규 gps 추가 메서드
-	public boolean insertDB(String gps) {
+	// 신규 address 추가 메서드
+	public boolean insertDB(String address) {
 		connect();
 		// sql 문자열 , id는 자동 등록 되므로 입력하지 않는다.
 
-		String sql = "insert into vo(gps) values(?)";
+		String sql = "insert into vo(address) values(?)";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, gps);
+			pstmt.setString(1, address);
 
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
@@ -111,24 +110,23 @@ public class PSCACBean {
 		return true;
 	}
 
-	// 특정 gps의 PSCACVo를 가져오는 메서드
-	public PSCACVo getDBFgps(String gps) throws UnsupportedEncodingException {
+	// 특정 address의 PSCACVo를 가져오는 메서드
+	public PSCACVo getDBFaddress(String address) throws UnsupportedEncodingException {
 		connect();
 
-	String sql = "select * from vo where gps=?";
+	String sql = "select * from vo where address=?";
 	PSCACVo vo = new PSCACVo();
 
 	try
 	{
 		pstmt = conn.prepareStatement(sql);
-		pstmt.setString(1, gps);
+		pstmt.setString(1, address);
 		ResultSet rs = pstmt.executeQuery();
 
 		// 데이터가 하나만 있으므로 rs.next()를 한번만 실행 한다. rs.next();
 		vo.setId(rs.getString("id"));
-		vo.setGps(rs.getString("gps"));
-		vo.setStatus(rs.getString("status"));
-
+		vo.setAddress(rs.getString("address"));
+		
 		rs.close();
 	}catch(SQLException e)
 	{
@@ -158,8 +156,7 @@ public class PSCACBean {
 		vo.setId(rs.getString("id"));
 		vo.setLatitude(rs.getString("latitude"));
 		vo.setLongtitud(rs.getString("longtitud"));
-		//vo.setGps(rs.getString("gps"));
-		vo.setStatus(rs.getString("status"));
+		
 		}
 
 		rs.close();
@@ -185,8 +182,8 @@ public class PSCACBean {
 				PSCACVo vo = new PSCACVo();
 
 				vo.setId(rs.getString("id"));
-				vo.setGps(rs.getString("gps"));
-				vo.setStatus(rs.getString("status"));
+				vo.setAddress(rs.getString("address"));
+				
 				datas.add(vo);
 			}
 			rs.close();
@@ -198,5 +195,6 @@ public class PSCACBean {
 		}
 		return datas;
 	}
+	
 
 }

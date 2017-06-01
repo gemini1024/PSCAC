@@ -2,6 +2,7 @@ package Controller;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Calendar;
 
 import Vo.PSCACVo;
 
@@ -25,6 +26,12 @@ public class ReceiveServer {
 			while (true) {
 				byte[] buffer = new byte[1024];
 				DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+				
+				Calendar cal=Calendar.getInstance();
+				String s=String.format("%tF %tT", cal, cal);
+
+
+	
 
 				// 클라이언트로부터 DatagramPacket을 전송 받기 위해서 DatagramPacket 객체 하나를 생성하고
 				// 패킷을 전송할 때까지 대기
@@ -33,7 +40,7 @@ public class ReceiveServer {
 				// 전송받은 데이터를 String 객체에 지정하고 출력
 				String msg = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-				System.out.println("Receiving : " + msg);
+				System.out.println(s+ "\n" + "Receiving : " + msg);
 				/*
 				 * //odroid 첫 부팅시 gps 수신 if(msg.equals("SendGps")){
 				 * pgps.receiveGPS(gps); System.out.println(gps); }

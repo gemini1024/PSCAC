@@ -1,34 +1,23 @@
 package Vo;
 
-public class PSCACVo {
+public class HazardVo {
 
 	private String Id;
+	private String Time;
 	private String Address;
-	private String Longtitud;
-	private String Latitude;
 	private String Status;
-	
-	
-	public String getLongtitud() {
-		return Longtitud;
-	}
-	public void setLongtitud(String longtitud) {
-		Longtitud = longtitud;
-	}
-	public String getLatitude() {
-		return Latitude;
-	}
-	public void setLatitude(String latitude) {
-		Latitude = latitude;
-	}
-
-	
 	
 	public String getId() {
 		return Id;
 	}
 	public void setId(String id) {
 		Id = id;
+	}
+	public String getTime() {
+		return Time;
+	}
+	public void setTime(String time) {
+		Time = time;
 	}
 	public String getAddress() {
 		return Address;
@@ -42,4 +31,6 @@ public class PSCACVo {
 	public void setStatus(String status) {
 		Status = status;
 	}
+	
+	
 }
