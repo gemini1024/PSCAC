@@ -5,11 +5,10 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <com.skp.Tmap.TMapView
+        android:id="@+id/tmap"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"/>
 
     <android.support.v7.widget.CardView
         android:layout_width="fill_parent"
