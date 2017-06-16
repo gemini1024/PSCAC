@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainRelativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@android:color/white"
     tools:context="com.example.ihc.proto_odroid_new.AlarmDetailActivity">
 
-        <fragment
-            android:id="@+id/map"
+        <com.skp.Tmap.TMapView
+            android:id="@+id/tmap"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            class="com.google.android.gms.maps.MapFragment"/>
+            android:layout_height="match_parent"/>
      <!-- 폴딩버튼자리 -->
 
-</LinearLayout>
+</RelativeLayout>
