@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
                 map = googleMap;
 
-                if(new GpsInfo(getApplicationContext()).checkPermission()) {
+                if(new GpsInfo(getApplicationContext()).checkPermission() &&  new GpsInfo(getApplicationContext()).isGetLocation(MainActivity.this)) {
                     Location location = new GpsInfo(getApplicationContext()).getLocationInService();
                     Log.d("현재 latitude", String.valueOf(location.getLatitude()));
                     Log.d("현재 longitude", String.valueOf(location.getLongitude()) );

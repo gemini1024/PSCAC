@@ -240,10 +240,12 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //경보종류 다양해 질 경우 if문으로 추가
         if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous")) {
             notificationBuilder.setContentText("주변 차도에 보행자가 있습니다!");
+//            speech.speak("주변에 차도에 보행자가 있습니다.",TextToSpeech.QUEUE_ADD, null);
             notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.warinngmp3));
         }
         if(warning.getMessage().equals("caution")){
             notificationBuilder.setContentText("주변 보행자가 차도로 접근 중입니다!");
+//            speech.speak("주변 보행자가 차도로 접근 중입니다!",TextToSpeech.QUEUE_ADD, null);
             notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.cautionmp3));
         }
     }
