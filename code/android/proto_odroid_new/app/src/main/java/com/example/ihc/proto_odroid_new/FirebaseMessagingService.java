@@ -1,5 +1,6 @@
 package com.example.ihc.proto_odroid_new;
 
+import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -34,7 +35,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     private static final String TAG = "FirebaseMsgService";
     //최소 알람거리. 경보가 발생한 위치과 현재 디바이스의 위치사이의 거리가 '최소 알람거리' 이내라면 경보한다.
     private static final double ALERT_DISTANCE = 200;
-    private AlertInfo warning = new AlertInfo();
+    static private AlertInfo warning = new AlertInfo();
 
     /**
      * fcm서버로부터 메세지가 도착하면 호출되는 메소드
@@ -51,7 +52,6 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //받은 메세지에서 위도,경도,위험경보 데이터를 가져온다.
         Map<String,String> msgData = remoteMessage.getData();
-
         //서버로 받은 데이터 중 누락된게 있는지 확인.
         //누락되었다면 뒷 작업 들어가지 않고 종료
         if(checkMissedData(msgData))  return;
@@ -62,6 +62,20 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //정보로 조건을 체크하고 경보하기
         checkAndAlert(warning);
     }
+
+    public boolean isRunning(Context ctx) {
+        ActivityManager activityManager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+        for (ActivityManager.RunningTaskInfo task : tasks) {
+            if (ctx.getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName()))
+
+                return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -189,6 +203,10 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         Log.d("checkAndAlert ","사이거리: " + String.valueOf(distance));
         if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
 
+        //메인액티비티 켜져있는지 확인 후 켜져있다면 메인액티비티에서 처리, 알람을 하지 않는다
+        if(isRunning(this)){
+            return null;
+        }
 
 
         //알림을 눌렀을 때 MainActivity로 전달될 데이터 intent에 넣어주기!
