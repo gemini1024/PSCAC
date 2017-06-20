@@ -5,10 +5,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.json.simple.JSONObject;
+import com.google.gson.Gson;
 
 import Vo.FCMVo;
+import Vo.Message;
 
 public class SendPushServer {
 
@@ -36,20 +39,36 @@ public class SendPushServer {
 
 		// String str = "\"content\":\".-w-10-.-g-20-.-alt-default-.\"";
 
-		JSONObject notification = new JSONObject();
-		JSONObject root = new JSONObject();
+		Map<String, Object> testVO = new HashMap<String, Object>();
 
-		notification.put("body", fcmvo.getMsg());
-		notification.put("title", fcmvo.getTitle());
-		root.put("notification", notification);
-		root.put("to", "/topics/alert"); // deviceID
+		Message message = new Message();		
+		message.setTitle(fcmvo.getTitle());
+		//message.setContent(fcmvo.getMsg());
+		
+		message.setLatitude(fcmvo.getLatitude());
+		message.setLongitude(fcmvo.getLongitude());
+		message.setAlarm(fcmvo.getAlarm());
+		
+		String to = "/topics/alert";
+
+		Gson gson = new Gson();
+
+		//testVO.put("message", message);
+
+		Map<String, Object> data = new HashMap<>();
+		data.put("data", message);
+		data.put("to", to);
+		String jsonStr = gson.toJson(data, HashMap.class).replaceAll("\\u0000", "");
+
+		System.out.println(jsonStr);
+
 
 		try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream())) {
 			// 혹시나 한글 깨짐이 발생하면
 			// try(OutputStreamWriter wr = new
 			// OutputStreamWriter(conn.getOutputStream(), "UTF-8")){ 인코딩을 변경해준다.
 
-			wr.write(root.toString());
+			wr.write(jsonStr.toString());
 			wr.flush();
 		} catch (Exception e) {
 		}
@@ -71,8 +90,21 @@ public class SendPushServer {
 
 	public static void main(String a[]) throws Exception {
 		SendPushServer send = new SendPushServer();
+		FCMVo fcmvo = new FCMVo();
+		
+		//E동
+		fcmvo.setLatitude("37.3396026");
+		fcmvo.setLongitude("126.7347525");
+		
+		//tip
+		//fcmvo.setLatitude("37.3410697");
+		//fcmvo.setLongitude("126.7331218");
+		
+		fcmvo.setAlarm("default");
+		fcmvo.setTitle("alert");
+		
 		try {
-			send.pushFCMNotification(null);
+			send.pushFCMNotification(fcmvo);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

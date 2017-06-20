@@ -1,17 +1,15 @@
 package Vo;
 
-public class FCMVo {
-	// android 로 보낼 정보
-	private String title = "제목입니다.";
-	private String msg = "내용입니다.";
+public class Message {
 	
-	private String latitude = "위도";
-	private String longitude = "경도";
-	private String alarm; // 알람
+	private String title;
+	private String content;
+	private String imgUrl;
+	private String link;
 	
-	private String ImgUrl;
-	private String Link;
-
+	private String latitude;
+	private String longitude;
+	private String alarm;
 	
 	public String getAlarm() {
 		return alarm;
@@ -37,39 +35,37 @@ public class FCMVo {
 		this.longitude = longitude;
 	}
 
-
+	public Message() {
+		// TODO Auto-generated constructor stub
+	}
 	
 	public String getTitle() {
 		return title;
 	}
-
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
-	public String getMsg() {
-		return msg;
+	
+	public String getContent() {
+		return content;
 	}
 
-	public void setMsg(String msg) {
-		this.msg = msg;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public String getImgUrl() {
-		return ImgUrl;
+		return imgUrl;
 	}
-
-	public void setImgUrl(String imgeUrl) {
-		ImgUrl = imgeUrl;
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
 	}
-
 	public String getLink() {
-		return Link;
+		return link;
 	}
-
 	public void setLink(String link) {
-		Link = link;
+		this.link = link;
 	}
 
-
+	
 }
