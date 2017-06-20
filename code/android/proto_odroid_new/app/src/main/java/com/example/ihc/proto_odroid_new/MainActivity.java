@@ -1,10 +1,16 @@
 package com.example.ihc.proto_odroid_new;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,7 +35,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 
-public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback {
+import static com.example.ihc.proto_odroid_new.FirebaseMessagingService.warning;
+
+public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback, LocationListener {
     // DEFAULT DATA
     private static final String LOG_TAG = "MainActivity";
     private double mLatitude = 37.339898, mLongitude = 126.734769;
@@ -38,6 +46,13 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private TMapPoint start;
     private TMapPoint end;
     private TMapMarkerItem curMarker = new TMapMarkerItem();
+    private TMapMarkerItem alertMarker = new TMapMarkerItem();
+    private BroadcastReceiver alertReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            showAlertMarker();
+        }
+    };
 
     @BindView(R.id.tmap)
     TMapView mMapView;
@@ -63,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         // Tmap
         mMapView.setSKPMapApiKey(getResources().getString(R.string.tmap_appkey));
-//        mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
+        mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
         mMapView.setIconVisibility(true);
         mMapView.MapZoomIn(); //맵 한단계 확대
         mMapView.setMapType(TMapView.MAPTYPE_STANDARD);
@@ -85,10 +100,22 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         curMarker.setTMapPoint(start);
         curMarker.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_car));
         mMapView.addMarkerItem("현재위치", curMarker);
+        mMapView.addMarkerItem("위험위치", alertMarker);
         mMapView.setCenterPoint(mLongitude, mLatitude);
 
+        registerReceiver(alertReceiver, new IntentFilter(FirebaseMessagingService.SHOW_ALERT_SIGN));
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if(new GpsInfo(getApplicationContext()).checkPermission()) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
+        }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(alertReceiver);
+    }
 
     @OnEditorAction(R.id.destination)
     protected boolean commitEditText(int actionId) {
@@ -148,11 +175,50 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     }
 
 
+    public void showAlertMarker() {
+        Log.d(LOG_TAG, "showAlertMarker");
+
+        Log.d(LOG_TAG, "alertInfo : "+warning.getMessage());
+        if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous"))
+            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_warning));
+        else if(warning.getMessage().equals("caution"))
+            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_caution));
+        mMapView.getMarkerItemFromID("위험위치").setTMapPoint(new TMapPoint(warning.getTarg_latitude(), warning.getTarg_longitude()));
+        mMapView.setCenterPoint(mLongitude, mLatitude);
+    }
+
+
     @Override
     public void onLocationChange(Location location) {
+        OnLocChange(location);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        OnLocChange(location);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    private void OnLocChange(Location location) {
+        Log.d(LOG_TAG, "위치변경됨");
         start.setLatitude(location.getLatitude());
         start.setLongitude(location.getLongitude());
         mMapView.setCenterPoint(mLongitude, mLatitude);
-        curMarker.setTMapPoint(start);
+        mMapView.getMarkerItemFromID("현재위치").setTMapPoint(start);
+
     }
 }

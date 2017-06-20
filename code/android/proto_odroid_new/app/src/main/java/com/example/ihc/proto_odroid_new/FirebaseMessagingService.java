@@ -35,7 +35,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     private static final String TAG = "FirebaseMsgService";
     //최소 알람거리. 경보가 발생한 위치과 현재 디바이스의 위치사이의 거리가 '최소 알람거리' 이내라면 경보한다.
     private static final double ALERT_DISTANCE = 200;
-    static private AlertInfo warning = new AlertInfo();
+    static public AlertInfo warning = new AlertInfo();
+    public static final String SHOW_ALERT_SIGN = "SHOW_ALERT_SIGN";
 
     /**
      * fcm서버로부터 메세지가 도착하면 호출되는 메소드
@@ -201,12 +202,16 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         Log.d("checkAndAlert ","보드위치: " + String.valueOf(warning.getTarg_latitude())+ String.valueOf(warning.getTarg_longitude()));
         Log.d("checkAndAlert ","현재위치: " + String.valueOf(warning.getDev_latitude())+String.valueOf(warning.getDev_longitude()));
         Log.d("checkAndAlert ","사이거리: " + String.valueOf(distance));
-        if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
+//        if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
 
         //메인액티비티 켜져있는지 확인 후 켜져있다면 메인액티비티에서 처리, 알람을 하지 않는다
         if(isRunning(this)){
+            Log.d("isRunning", "isRunning");
+            Intent intent = new Intent(SHOW_ALERT_SIGN);
+            sendBroadcast(intent);
             return null;
         }
+        Log.d("isNotRunning", "isNotRunning");
 
 
         //알림을 눌렀을 때 MainActivity로 전달될 데이터 intent에 넣어주기!
