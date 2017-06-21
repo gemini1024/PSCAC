@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">proto_odroid_new</string>
+    <string name="app_name">SafetyRoute</string>
 
     <!-- tmap app key -->
     <string name="tmap_appkey">b1f12f99-f3ca-3cc0-bd81-2d3bf3eb874e</string>

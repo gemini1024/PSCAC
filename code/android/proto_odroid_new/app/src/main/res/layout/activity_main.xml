@@ -5,11 +5,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <com.skp.Tmap.TMapView
-        android:id="@+id/tmap"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
+    <!--길찾기 UI-->
     <android.support.v7.widget.CardView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -22,15 +18,24 @@
         card_view:cardCornerRadius="8dp">
 
         <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/icon_destination"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="10dp"
+                android:layout_width="36dp"
+                android:src="@mipmap/ic_launcher"
+                android:layout_height="36dp" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:layout_toRightOf="@id/icon_destination"
+                android:padding="10dp">
 
                 <AutoCompleteTextView
                     android:id="@+id/destination"
@@ -42,15 +47,78 @@
                     android:imeOptions="actionGo"
                     android:hint="목적지를 입력해주세요" />
             </LinearLayout>
+
             <ImageView
                 android:id="@+id/send"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="15dp"
                 android:layout_alignParentRight="true"
                 android:layout_width="36dp"
-                android:src="@android:drawable/ic_menu_send"
+                android:src="@android:drawable/ic_search_category_default"
                 android:layout_height="36dp" />
 
         </RelativeLayout>
     </android.support.v7.widget.CardView>
+
+
+    <!--맵-->
+    <com.skp.Tmap.TMapView
+        android:id="@+id/tmap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!--상태 화면-->
+    <GridLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="@android:color/background_light"
+        android:columnCount="5"
+        android:padding="20dp">
+
+        <ImageView
+            android:id="@+id/sign_img"
+            android:layout_columnSpan="2"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="fitCenter"/>
+
+        <jp.mixi.compatibility.android.widget.TextViewCompat
+            android:id="@+id/sign_text"
+            android:layout_gravity="center"
+            android:layout_columnSpan="3"
+            android:textSize="20dp"
+            android:text="주변도로상황 : 안전"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"/>
+    </GridLayout>
+
+
+    <!--로딩 화면-->
+    <LinearLayout
+        android:id="@+id/loading_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#77ff77">
+
+        <ImageView
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="fitXY"/>
+
+        <jp.mixi.compatibility.android.widget.TextViewCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/secondary_text"
+            android:textStyle="bold"
+            android:textSize="15dp"
+            android:text="지도 불러오는 중 ..."/>
+
+
+    </LinearLayout>
 </FrameLayout>

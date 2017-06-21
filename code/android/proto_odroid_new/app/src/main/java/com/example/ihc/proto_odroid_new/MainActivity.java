@@ -11,14 +11,20 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.skp.Tmap.TMapData;
 import com.skp.Tmap.TMapGpsManager;
@@ -35,6 +41,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 
+import static com.example.ihc.proto_odroid_new.FirebaseMessagingService.ALERT_DISTANCE;
+import static com.example.ihc.proto_odroid_new.FirebaseMessagingService.distance;
 import static com.example.ihc.proto_odroid_new.FirebaseMessagingService.warning;
 
 public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback, LocationListener {
@@ -54,6 +62,17 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         }
     };
 
+    // Medias
+    MediaPlayer cautionMedia;
+    MediaPlayer dangerousMedia;
+
+    // Views
+    @BindView(R.id.loading_indicator)
+    LinearLayout loading_screen;
+    @BindView(R.id.sign_img)
+    ImageView signImageView;
+    @BindView(R.id.sign_text)
+    TextView signTextView;
     @BindView(R.id.tmap)
     TMapView mMapView;
     @BindView(R.id.destination)
@@ -71,11 +90,36 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // 로드 화면
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    super.run();
+                    sleep(3000);
+                } catch (Exception e) {
+
+                } finally {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loading_screen.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            }
+        }.start();
+
+        // 음성파일 준비
+        cautionMedia = MediaPlayer.create(this, R.raw.cautionmp3);
+        dangerousMedia = MediaPlayer.create(this, R.raw.warinngmp3);
+
         //퍼미션체크
         new GpsInfo().requestPermission(this);
         //fcm푸시메세지 topic설정. 서버에서 전체 어플사용자로 전송할 때, 내부적으로 이 설정값에 따라 받을지 말지 결정(추측)
         FirebaseMessaging.getInstance().subscribeToTopic("alert");
 
+        Glide.with(this).load(R.raw.sign_safe).into(signImageView);
         // Tmap
         mMapView.setSKPMapApiKey(getResources().getString(R.string.tmap_appkey));
         mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
@@ -162,6 +206,8 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
 
     public void searchRoute() {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(destination.getWindowToken(), 0);
         progressDialog = ProgressDialog.show(this, "Please wait.",
                     "Fetching route information.", true);
         new TMapData().findPathDataWithType(TMapData.TMapPathType.CAR_PATH, start, end, new TMapData.FindPathDataListenerCallback() {
@@ -175,14 +221,21 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     }
 
 
-    public void showAlertMarker() {
+    private void showAlertMarker() {
         Log.d(LOG_TAG, "showAlertMarker");
 
         Log.d(LOG_TAG, "alertInfo : "+warning.getMessage());
-        if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous"))
-            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_warning));
-        else if(warning.getMessage().equals("caution"))
-            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_caution));
+        if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous")) {
+            Glide.with(this).load(R.raw.sign_dangerous).into(signImageView);
+            signTextView.setText("주변도로상황 : 위험");
+            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_warning));
+            dangerousMedia.start();
+        } else if(warning.getMessage().equals("caution")) {
+            Glide.with(this).load(R.raw.sign_caution).into(signImageView);
+            signTextView.setText("주변도로상황 : 주의");
+            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_caution));
+            cautionMedia.start();
+        }
         mMapView.getMarkerItemFromID("위험위치").setTMapPoint(new TMapPoint(warning.getTarg_latitude(), warning.getTarg_longitude()));
         mMapView.setCenterPoint(mLongitude, mLatitude);
     }
@@ -191,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     @Override
     public void onLocationChange(Location location) {
         OnLocChange(location);
+        mMapView.setCenterPoint(mLongitude, mLatitude);
     }
 
     @Override
@@ -217,8 +271,11 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         Log.d(LOG_TAG, "위치변경됨");
         start.setLatitude(location.getLatitude());
         start.setLongitude(location.getLongitude());
-        mMapView.setCenterPoint(mLongitude, mLatitude);
         mMapView.getMarkerItemFromID("현재위치").setTMapPoint(start);
 
+        if ( !signTextView.getText().equals("주변도로상황 : 안전") && (distance > ALERT_DISTANCE || distance == -1.0)) {
+            Glide.with(this).load(R.raw.sign_safe).into(signImageView);
+            signTextView.setText("주변도로상황 : 안전");
+        }
     }
 }

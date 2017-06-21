@@ -34,8 +34,9 @@ import static com.example.ihc.proto_odroid_new.R.drawable.icon_warning;
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
     //최소 알람거리. 경보가 발생한 위치과 현재 디바이스의 위치사이의 거리가 '최소 알람거리' 이내라면 경보한다.
-    private static final double ALERT_DISTANCE = 200;
-    static public AlertInfo warning = new AlertInfo();
+    public static final double ALERT_DISTANCE = 200;
+    public static AlertInfo warning = new AlertInfo();
+    public static double distance = Double.MAX_VALUE;
     public static final String SHOW_ALERT_SIGN = "SHOW_ALERT_SIGN";
 
     /**
@@ -198,11 +199,11 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //거리계산
         //두 디바이스 간 거리가 설정범위보다 멀리 떨어져 있으면 알람하지 않는다.
-        double distance = getDistance(warning.getTarg_latitude(), warning.getTarg_longitude(), warning.getDev_latitude(), warning.getDev_longitude(), "meter");
+        distance = getDistance(warning.getTarg_latitude(), warning.getTarg_longitude(), warning.getDev_latitude(), warning.getDev_longitude(), "meter");
         Log.d("checkAndAlert ","보드위치: " + String.valueOf(warning.getTarg_latitude())+ String.valueOf(warning.getTarg_longitude()));
         Log.d("checkAndAlert ","현재위치: " + String.valueOf(warning.getDev_latitude())+String.valueOf(warning.getDev_longitude()));
         Log.d("checkAndAlert ","사이거리: " + String.valueOf(distance));
-//        if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
+        if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
 
         //메인액티비티 켜져있는지 확인 후 켜져있다면 메인액티비티에서 처리, 알람을 하지 않는다
         if(isRunning(this)){
