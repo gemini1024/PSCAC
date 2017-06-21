@@ -10,25 +10,23 @@ public class AlertInfo {
     //위도,경도,위험종류
     private double targ_latitude;
     private double targ_longitude;
-    private String message;
+    private AlertSituation situation;
     private String time;
     private String address;
     private String content;
 
     public AlertInfo(){}
-    public AlertInfo(double latitude,double longitude,String message){
+    public AlertInfo(double latitude,double longitude,AlertSituation situation){
         this.targ_latitude = latitude;
         this.targ_longitude = longitude;
-        this.message = message;
+        this.situation = situation;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getMessage() {
-        return message;
-    }
+    public AlertSituation getSituation() { return situation; }
 
     public double getTarg_longitude() {
         return targ_longitude;
@@ -67,9 +65,7 @@ public class AlertInfo {
         this.targ_latitude = latitude;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+    public void setSituation(AlertSituation situation) { this.situation = situation; }
 
     public void setTarg_longitude(double longitude) {
         this.targ_longitude = longitude;

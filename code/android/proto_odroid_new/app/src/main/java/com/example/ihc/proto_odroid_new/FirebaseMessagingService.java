@@ -1,5 +1,6 @@
 package com.example.ihc.proto_odroid_new;
 
+import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -33,8 +34,10 @@ import static com.example.ihc.proto_odroid_new.R.drawable.icon_warning;
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
     //최소 알람거리. 경보가 발생한 위치과 현재 디바이스의 위치사이의 거리가 '최소 알람거리' 이내라면 경보한다.
-    private static final double ALERT_DISTANCE = 200;
-    private AlertInfo warning = new AlertInfo();
+    public static final double ALERT_DISTANCE = 200;
+    public static AlertInfo warning = new AlertInfo();
+    public static double distance = Double.MAX_VALUE;
+    public static final String SHOW_ALERT_SIGN = "SHOW_ALERT_SIGN";
 
     /**
      * fcm서버로부터 메세지가 도착하면 호출되는 메소드
@@ -51,7 +54,6 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //받은 메세지에서 위도,경도,위험경보 데이터를 가져온다.
         Map<String,String> msgData = remoteMessage.getData();
-
         //서버로 받은 데이터 중 누락된게 있는지 확인.
         //누락되었다면 뒷 작업 들어가지 않고 종료
         if(checkMissedData(msgData))  return;
@@ -62,6 +64,20 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //정보로 조건을 체크하고 경보하기
         checkAndAlert(warning);
     }
+
+    public boolean isRunning(Context ctx) {
+        ActivityManager activityManager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+        for (ActivityManager.RunningTaskInfo task : tasks) {
+            if (ctx.getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName()))
+
+                return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -76,7 +92,11 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //위도,경도,위험메세지를 담는 AlertInfo객체를 만들고 데이터를 넣는다.
         warning.setTarg_latitude(Double.parseDouble(msgData.get("latitude")));
         warning.setTarg_longitude(Double.parseDouble(msgData.get("longitude")));
-        warning.setMessage(msgData.get("alarm"));
+        String message = msgData.get("alarm");
+        for(AlertSituation situation : AlertSituation.values()) {
+            if(message.equals(situation.getMessage()))
+                warning.setSituation(situation);
+        }
 
         //경고발생시간설정
         warning.setTime(getCurTime());
@@ -183,19 +203,27 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //거리계산
         //두 디바이스 간 거리가 설정범위보다 멀리 떨어져 있으면 알람하지 않는다.
-        double distance = getDistance(warning.getTarg_latitude(), warning.getTarg_longitude(), warning.getDev_latitude(), warning.getDev_longitude(), "meter");
+        distance = getDistance(warning.getTarg_latitude(), warning.getTarg_longitude(), warning.getDev_latitude(), warning.getDev_longitude(), "meter");
         Log.d("checkAndAlert ","보드위치: " + String.valueOf(warning.getTarg_latitude())+ String.valueOf(warning.getTarg_longitude()));
         Log.d("checkAndAlert ","현재위치: " + String.valueOf(warning.getDev_latitude())+String.valueOf(warning.getDev_longitude()));
         Log.d("checkAndAlert ","사이거리: " + String.valueOf(distance));
         if (distance > ALERT_DISTANCE || distance == -1.0)  return null;
 
+        //메인액티비티 켜져있는지 확인 후 켜져있다면 메인액티비티에서 처리, 알람을 하지 않는다
+        if(isRunning(this)){
+            Log.d("isRunning", "isRunning");
+            Intent intent = new Intent(SHOW_ALERT_SIGN);
+            sendBroadcast(intent);
+            return null;
+        }
+        Log.d("isNotRunning", "isNotRunning");
 
 
         //알림을 눌렀을 때 MainActivity로 전달될 데이터 intent에 넣어주기!
         Intent intent = new Intent(this, AlarmDetailActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addCategory("noti");
-        intent.putExtra("alert", warning.getMessage());
+        intent.putExtra("alert", warning.getSituation());
         intent.putExtra("targ_latitude", warning.getTarg_latitude());
         intent.putExtra("targ_longitude", warning.getTarg_longitude());
         intent.putExtra("dev_latitude",warning.getDev_latitude());
@@ -238,12 +266,14 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //경보가 디폴트일때, 디폴트경보발생(푸시알림 및 소리)
         //경보종류 다양해 질 경우 if문으로 추가
-        if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous")) {
+        if (warning.getSituation() == AlertSituation.DANGEROUS) {
             notificationBuilder.setContentText("주변 차도에 보행자가 있습니다!");
+//            speech.speak("주변에 차도에 보행자가 있습니다.",TextToSpeech.QUEUE_ADD, null);
             notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.warinngmp3));
         }
-        if(warning.getMessage().equals("caution")){
+        else if(warning.getSituation() == AlertSituation.CAUTION){
             notificationBuilder.setContentText("주변 보행자가 차도로 접근 중입니다!");
+//            speech.speak("주변 보행자가 차도로 접근 중입니다!",TextToSpeech.QUEUE_ADD, null);
             notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.cautionmp3));
         }
     }
