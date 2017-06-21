@@ -77,8 +77,8 @@ int takeRoad(std::string videoSource)
     // bgMask.printProperties();
 
     // Select the source of the mask.
-    UMat mask = bgMask.createBackgroundMask(vc);
-    // UMat mask = bgMask.loadBackgroundMask();
+    // UMat mask = bgMask.createBackgroundMask(vc);
+    UMat mask = bgMask.loadBackgroundMask();
     imshow( CamDef::mask, mask );  // show background mask
 
 
@@ -87,10 +87,10 @@ int takeRoad(std::string videoSource)
     Situation situation( vc.get(CV_CAP_PROP_FRAME_HEIGHT), vc.get(CV_CAP_PROP_FRAME_WIDTH), vc.get(CV_CAP_PROP_FPS)*4 );
 
     // Select the source of the roadImg.
-    situation.createRoadImg(vc, bgMask, car_Detector, 300);
-    // situation.loadRoadImg();
+    // situation.createRoadImg(vc, bgMask, car_Detector, 300);
+    situation.loadRoadImg();
     imshow( CamDef::roadImg, situation.getRoadImg() );
-    situation.setSignToFullScreen();
+    // situation.setSignToFullScreen();
 
 
 

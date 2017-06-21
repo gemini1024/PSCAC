@@ -15,10 +15,10 @@ namespace CamDef {
     };
 
     // The title of screens printed on screens
-    // const std::string learnedMask("camera/data/scenario_mask.png");
-    // const std::string learnedRoadImg("camera/data/scenario_road.png");
-    const std::string learnedMask("camera/data/learnedMask_opt.png");
-    const std::string learnedRoadImg("camera/data/learnedRoadImg_opt.png");
+    const std::string learnedMask("camera/data/scenario_mask.png");
+    const std::string learnedRoadImg("camera/data/scenario_road.png");
+    // const std::string learnedMask("camera/data/learnedMask_opt.png");
+    // const std::string learnedRoadImg("camera/data/learnedRoadImg_opt.png");
 
     // Windows name
     const std::string originalVideo("origin");

@@ -156,7 +156,7 @@ void Situation::setSituation(int situation, bool isCarOnRoad) {
             safeCnt = 0;
             break;
         case CAUTION :
-            if( sendDelayCnt <= 0 && isCarOnRoad) {
+            if( sendDelayCnt <= 0 ) {
                 sendSignalToParentProcess( SigDef::SIG_CAUTION );
                 std::cout << " [[ SEND_SIGNAL ]] SIG_CAUTION " << std:: endl;
                 sendDelayCnt = delay/2;
@@ -166,7 +166,7 @@ void Situation::setSituation(int situation, bool isCarOnRoad) {
             safeCnt = delay/2;
             break;
         case DANGER :
-            if( sendDelayCnt <= delay/2 && isCarOnRoad) {
+            if( sendDelayCnt <= delay/2 ) {
                 sendSignalToParentProcess( SigDef::SIG_DANGER );
                 std::cout << " [[ SEND_SIGNAL ]] SIG_DANGER " << std:: endl;
                 sendDelayCnt = delay;

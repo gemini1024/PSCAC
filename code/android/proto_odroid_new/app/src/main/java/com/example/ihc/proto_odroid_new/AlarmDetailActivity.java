@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -36,7 +37,8 @@ public class AlarmDetailActivity extends Activity implements TMapGpsManager.onLo
         targ_longitude = getIntent().getExtras().getDouble("targ_longitude");
         dev_latitude = getIntent().getExtras().getDouble("dev_latitude");
         dev_longitude = getIntent().getExtras().getDouble("dev_longitude");
-
+        AlertSituation situation = (AlertSituation)getIntent().getSerializableExtra("alert");
+        Log.d("AlarmDetailActivity ",situation.toString());
         //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
         mMapView.setCompassMode(true);
         //맵 한단계 확대
@@ -53,7 +55,11 @@ public class AlarmDetailActivity extends Activity implements TMapGpsManager.onLo
         dev_marker.setTMapPoint(dev_point);
 
         //보드,디바이스 마커에 이미지설정
-        targ_marker.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_caution));
+        if(situation == AlertSituation.CAUTION)
+            targ_marker.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_caution));
+        else if(situation == AlertSituation.DANGEROUS)
+            targ_marker.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_warning));
+
         dev_marker.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_car));
 
         mMapView.addMarkerItem("위험발생",targ_marker);

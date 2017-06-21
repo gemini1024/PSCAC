@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
@@ -118,6 +120,8 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         // 음성파일 준비
         cautionMedia = MediaPlayer.create(this, R.raw.cautionmp3);
         dangerousMedia = MediaPlayer.create(this, R.raw.warinngmp3);
@@ -134,15 +138,14 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         // Tmap
         mMapView.setSKPMapApiKey(getResources().getString(R.string.tmap_appkey));
-//        mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
-        mMapView.setIconVisibility(true);
+        mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
+//        mMapView.setIconVisibility(true);
         mMapView.MapZoomIn(); //맵 한단계 확대
         mMapView.setMapType(TMapView.MAPTYPE_STANDARD);
         mMapView.setLanguage(TMapView.LANGUAGE_KOREAN);
 //        mMapView.setTrackingMode(true);
-        mMapView.setSightVisible(true);
-        mMapView.setTrafficInfo(true);
-        mMapView.setMarkerRotate(true);
+//        mMapView.setSightVisible(true);
+//        mMapView.setTrafficInfo(true);
 
         if(new GpsInfo(getApplicationContext()).checkPermission() &&  new GpsInfo(getApplicationContext()).isGetLocation(MainActivity.this)) {
             Location location = new GpsInfo(getApplicationContext()).getLocationInService();
@@ -258,12 +261,14 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         if (warning.getSituation() == AlertSituation.DANGEROUS) {
             Glide.with(this).load(R.raw.sign_dangerous).into(signImageView);
             signTextView.setText("주변도로상황 : 위험");
+            signTextView.setTextColor(Color.parseColor("#ff3434")); // dark_red
             mMapView.getMarkerItemFromID("위험위치").setIcon(markerDangerousImage);
             dangerousMedia.start();
             curSituation = AlertSituation.DANGEROUS;
         } else if(warning.getSituation() == AlertSituation.CAUTION) {
             Glide.with(this).load(R.raw.sign_caution).into(signImageView);
             signTextView.setText("주변도로상황 : 주의");
+            signTextView.setTextColor(Color.parseColor("#bbbb22")); // dark_yellow
             mMapView.getMarkerItemFromID("위험위치").setIcon(markerCautionImage);
             cautionMedia.start();
             curSituation = AlertSituation.CAUTION;
@@ -308,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         if ( curSituation != AlertSituation.SAFETY && (distance > ALERT_DISTANCE || distance == -1.0)) {
             Glide.with(this).load(R.raw.sign_safe).into(signImageView);
             signTextView.setText("주변도로상황 : 안전");
+            signTextView.setTextColor(Color.BLACK);
             curSituation = AlertSituation.SAFETY;
         }
     }
