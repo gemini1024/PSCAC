@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
@@ -35,6 +36,7 @@ import com.skp.Tmap.TMapView;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,11 +50,12 @@ import static com.example.ihc.proto_odroid_new.FirebaseMessagingService.warning;
 public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback, LocationListener {
     // DEFAULT DATA
     private static final String LOG_TAG = "MainActivity";
-    private double mLatitude = 37.339898, mLongitude = 126.734769;
+    private final double DEFAULT_LATITUDE = 37.339898;
+    private final double DEFAULT_LONGITUDE = 126.734769;
 
     // map & LatLng
-    private TMapPoint start;
-    private TMapPoint end;
+    private TMapPoint curPoint = new TMapPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+    private TMapPoint destPoint;
     private TMapMarkerItem curMarker = new TMapMarkerItem();
     private TMapMarkerItem alertMarker = new TMapMarkerItem();
     private BroadcastReceiver alertReceiver = new BroadcastReceiver() {
@@ -63,33 +66,30 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     };
 
     // Medias
-    MediaPlayer cautionMedia;
-    MediaPlayer dangerousMedia;
+    private MediaPlayer cautionMedia;
+    private MediaPlayer dangerousMedia;
+
+    // Bitmaps
+    private Bitmap markerDangerousImage;
+    private Bitmap markerCautionImage;
+    private AlertSituation curSituation = AlertSituation.SAFETY;
 
     // Views
-    @BindView(R.id.loading_indicator)
-    LinearLayout loading_screen;
-    @BindView(R.id.sign_img)
-    ImageView signImageView;
-    @BindView(R.id.sign_text)
-    TextView signTextView;
-    @BindView(R.id.tmap)
-    TMapView mMapView;
-    @BindView(R.id.destination)
-    AutoCompleteTextView destination;
-    @BindView(R.id.send)
-    ImageView send;
+    @BindView(R.id.loading_indicator) LinearLayout loading_screen;
+    @BindView(R.id.destination) AutoCompleteTextView destination;
+    @BindView(R.id.send) ImageView send;
+    @BindView(R.id.tmap) TMapView mMapView;
+    @BindView(R.id.sign_img) ImageView signImageView;
+    @BindView(R.id.sign_text) TextView signTextView;
 
     // draw direction
+    private Geocoder geocoder;
     private ProgressDialog progressDialog;
     private TMapPolyLine polyline;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-
+    protected void onStart() {
+        super.onStart();
         // 로드 화면
         new Thread() {
             @Override
@@ -110,6 +110,14 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
             }
         }.start();
 
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+
         // 음성파일 준비
         cautionMedia = MediaPlayer.create(this, R.raw.cautionmp3);
         dangerousMedia = MediaPlayer.create(this, R.raw.warinngmp3);
@@ -119,10 +127,14 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         //fcm푸시메세지 topic설정. 서버에서 전체 어플사용자로 전송할 때, 내부적으로 이 설정값에 따라 받을지 말지 결정(추측)
         FirebaseMessaging.getInstance().subscribeToTopic("alert");
 
+        // 이미지 준비
         Glide.with(this).load(R.raw.sign_safe).into(signImageView);
+        markerDangerousImage = BitmapFactory.decodeResource(getResources(), R.drawable.icon_warning);
+        markerCautionImage = BitmapFactory.decodeResource(getResources(), R.drawable.icon_caution);
+
         // Tmap
         mMapView.setSKPMapApiKey(getResources().getString(R.string.tmap_appkey));
-        mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
+//        mMapView.setCompassMode(true); //지도를 디바이스의 방향에 따라 움직이는 나침반 모드로 변경
         mMapView.setIconVisibility(true);
         mMapView.MapZoomIn(); //맵 한단계 확대
         mMapView.setMapType(TMapView.MAPTYPE_STANDARD);
@@ -130,23 +142,25 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 //        mMapView.setTrackingMode(true);
         mMapView.setSightVisible(true);
         mMapView.setTrafficInfo(true);
+        mMapView.setMarkerRotate(true);
 
         if(new GpsInfo(getApplicationContext()).checkPermission() &&  new GpsInfo(getApplicationContext()).isGetLocation(MainActivity.this)) {
             Location location = new GpsInfo(getApplicationContext()).getLocationInService();
             Log.d("현재 latitude", String.valueOf(location.getLatitude()));
             Log.d("현재 longitude", String.valueOf(location.getLongitude()) );
-            mLatitude = location.getLatitude();
-            mLongitude = location.getLongitude();
-            Log.d(LOG_TAG, "현재위치 불러오기 완료");
+            curPoint.setLatitude(location.getLatitude());
+            curPoint.setLongitude(location.getLongitude());
         }
 
-        start = new TMapPoint(mLatitude, mLongitude);
-        curMarker.setTMapPoint(start);
+        // 마커
+        curMarker.setTMapPoint(curPoint);
         curMarker.setIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon_car));
         mMapView.addMarkerItem("현재위치", curMarker);
         mMapView.addMarkerItem("위험위치", alertMarker);
-        mMapView.setCenterPoint(mLongitude, mLatitude);
+        mMapView.setCenterPoint(curPoint.getLongitude(), curPoint.getLatitude());
 
+        // 경로
+        geocoder = new Geocoder(this);
         registerReceiver(alertReceiver, new IntentFilter(FirebaseMessagingService.SHOW_ALERT_SIGN));
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if(new GpsInfo(getApplicationContext()).checkPermission()) {
@@ -175,9 +189,9 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     protected void sendRequest()
     {
         if(CheckOnline.isOnline(this)) {
-            end = getLocationFromAddress(destination.getText().toString());
+            destPoint = getLocationFromAddress(destination.getText().toString());
 
-            if(end == null) destination.setError("목적지를 찾을 수 없습니다");
+            if(destPoint == null) destination.setError("목적지를 찾을 수 없습니다");
             else searchRoute();
         }
         else {
@@ -188,7 +202,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
 
     private TMapPoint getLocationFromAddress(String strAddress){
-        Geocoder geocoder = new Geocoder(this);
         List<Address> addresses;
         TMapPoint tMapPoint = null;
         try {
@@ -204,13 +217,31 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         return tMapPoint;
     }
 
+    private String getAddressFromLocation(double latitude, double longitude) {
+        List<Address> addresses;
+        geocoder = new Geocoder(this, Locale.getDefault());
+        String address = "위치정보를 찾을 수 없음";
 
-    public void searchRoute() {
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            address = addresses.get(0).getAddressLine(0);
+//            String city = addresses.get(0).getLocality();
+//            String state = addresses.get(0).getAdminArea();
+//            String country = addresses.get(0).getCountryName();
+//            String postalCode = addresses.get(0).getPostalCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
+    }
+
+
+    private void searchRoute() {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(destination.getWindowToken(), 0);
         progressDialog = ProgressDialog.show(this, "Please wait.",
-                    "Fetching route information.", true);
-        new TMapData().findPathDataWithType(TMapData.TMapPathType.CAR_PATH, start, end, new TMapData.FindPathDataListenerCallback() {
+                "Fetching route information.", true);
+        new TMapData().findPathDataWithType(TMapData.TMapPathType.CAR_PATH, curPoint, destPoint, new TMapData.FindPathDataListenerCallback() {
             @Override
             public void onFindPathData(TMapPolyLine tMapPolyLine) {
                 polyline = tMapPolyLine;
@@ -224,27 +255,28 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private void showAlertMarker() {
         Log.d(LOG_TAG, "showAlertMarker");
 
-        Log.d(LOG_TAG, "alertInfo : "+warning.getMessage());
-        if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous")) {
+        if (warning.getSituation() == AlertSituation.DANGEROUS) {
             Glide.with(this).load(R.raw.sign_dangerous).into(signImageView);
             signTextView.setText("주변도로상황 : 위험");
-            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_warning));
+            mMapView.getMarkerItemFromID("위험위치").setIcon(markerDangerousImage);
             dangerousMedia.start();
-        } else if(warning.getMessage().equals("caution")) {
+            curSituation = AlertSituation.DANGEROUS;
+        } else if(warning.getSituation() == AlertSituation.CAUTION) {
             Glide.with(this).load(R.raw.sign_caution).into(signImageView);
             signTextView.setText("주변도로상황 : 주의");
-            mMapView.getMarkerItemFromID("위험위치").setIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_caution));
+            mMapView.getMarkerItemFromID("위험위치").setIcon(markerCautionImage);
             cautionMedia.start();
+            curSituation = AlertSituation.CAUTION;
         }
         mMapView.getMarkerItemFromID("위험위치").setTMapPoint(new TMapPoint(warning.getTarg_latitude(), warning.getTarg_longitude()));
-        mMapView.setCenterPoint(mLongitude, mLatitude);
+        mMapView.setCenterPoint(curPoint.getLongitude(), curPoint.getLatitude());
     }
 
 
     @Override
     public void onLocationChange(Location location) {
         OnLocChange(location);
-        mMapView.setCenterPoint(mLongitude, mLatitude);
+        mMapView.setCenterPoint(curPoint.getLongitude(), curPoint.getLatitude());
     }
 
     @Override
@@ -269,13 +301,14 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
     private void OnLocChange(Location location) {
         Log.d(LOG_TAG, "위치변경됨");
-        start.setLatitude(location.getLatitude());
-        start.setLongitude(location.getLongitude());
-        mMapView.getMarkerItemFromID("현재위치").setTMapPoint(start);
+        curPoint.setLatitude(location.getLatitude());
+        curPoint.setLongitude(location.getLongitude());
+        mMapView.getMarkerItemFromID("현재위치").setTMapPoint(curPoint);
 
-        if ( !signTextView.getText().equals("주변도로상황 : 안전") && (distance > ALERT_DISTANCE || distance == -1.0)) {
+        if ( curSituation != AlertSituation.SAFETY && (distance > ALERT_DISTANCE || distance == -1.0)) {
             Glide.with(this).load(R.raw.sign_safe).into(signImageView);
             signTextView.setText("주변도로상황 : 안전");
+            curSituation = AlertSituation.SAFETY;
         }
     }
 }

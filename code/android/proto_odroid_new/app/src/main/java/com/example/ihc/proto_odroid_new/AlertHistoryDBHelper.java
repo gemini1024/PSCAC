@@ -73,7 +73,7 @@ public class AlertHistoryDBHelper extends SQLiteOpenHelper {
     public boolean insertData(AlertInfo data){
         ContentValues contentValues = new ContentValues();
 
-        contentValues.put(ALERT, data.getMessage());
+        contentValues.put(ALERT, data.getSituation().toString());
         contentValues.put(TARG_LATITUDE,data.getTarg_latitude());
         contentValues.put(TARG_LONGITUDE,data.getTarg_longitude());
         contentValues.put(DEV_LATITUDE,data.getDev_latitude());

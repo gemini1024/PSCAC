@@ -92,7 +92,11 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         //위도,경도,위험메세지를 담는 AlertInfo객체를 만들고 데이터를 넣는다.
         warning.setTarg_latitude(Double.parseDouble(msgData.get("latitude")));
         warning.setTarg_longitude(Double.parseDouble(msgData.get("longitude")));
-        warning.setMessage(msgData.get("alarm"));
+        String message = msgData.get("alarm");
+        for(AlertSituation situation : AlertSituation.values()) {
+            if(message.equals(situation.getMessage()))
+                warning.setSituation(situation);
+        }
 
         //경고발생시간설정
         warning.setTime(getCurTime());
@@ -219,7 +223,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         Intent intent = new Intent(this, AlarmDetailActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addCategory("noti");
-        intent.putExtra("alert", warning.getMessage());
+        intent.putExtra("alert", warning.getSituation());
         intent.putExtra("targ_latitude", warning.getTarg_latitude());
         intent.putExtra("targ_longitude", warning.getTarg_longitude());
         intent.putExtra("dev_latitude",warning.getDev_latitude());
@@ -262,12 +266,12 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         //경보가 디폴트일때, 디폴트경보발생(푸시알림 및 소리)
         //경보종류 다양해 질 경우 if문으로 추가
-        if (warning.getMessage().equals("default") || warning.getMessage().equals("dangerous")) {
+        if (warning.getSituation() == AlertSituation.DANGEROUS) {
             notificationBuilder.setContentText("주변 차도에 보행자가 있습니다!");
 //            speech.speak("주변에 차도에 보행자가 있습니다.",TextToSpeech.QUEUE_ADD, null);
             notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.warinngmp3));
         }
-        if(warning.getMessage().equals("caution")){
+        else if(warning.getSituation() == AlertSituation.CAUTION){
             notificationBuilder.setContentText("주변 보행자가 차도로 접근 중입니다!");
 //            speech.speak("주변 보행자가 차도로 접근 중입니다!",TextToSpeech.QUEUE_ADD, null);
             notificationBuilder.setSound(Uri.parse("android.resource://com.example.ihc.proto_odroid_new/" + R.raw.cautionmp3));
